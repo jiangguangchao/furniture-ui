@@ -195,6 +195,13 @@
             link
             type="primary"
             icon="Edit"
+            @click="handleDetail(scope.row)"
+            >详情</el-button
+          >
+          <el-button
+            link
+            type="primary"
+            icon="Edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['order:furnitureOrder:edit']"
             >修改</el-button
@@ -308,6 +315,11 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 订单详情 -->
+    <el-dialog :title="detailTitle" v-model="detailOpen" width="800px" append-to-body>
+      <detailTab :order="currentOrder" />
+    </el-dialog>
   </div>
 </template>
 
@@ -320,6 +332,7 @@ import {
   updateFurnitureOrder,
 } from "@/api/order/furnitureOrder";
 import useDistrictsStore from "@/store/modules/districts";
+import detailTab from "./detailTab.vue"
 
 const districtsStore = useDistrictsStore();
 
@@ -337,6 +350,10 @@ const total = ref(0);
 const title = ref("");
 const daterangeOrderTime = ref([]);
 const defaultTime = new Date(2000, 1, 1, 12, 0, 0);
+
+const detailOpen = ref(false);
+const detailTitle = ref("订单详情");
+const currentOrder = ref({});
 
 const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));
 const villageArr = computed(() =>
@@ -464,6 +481,12 @@ function handleUpdate(row) {
     open.value = true;
     title.value = "修改家具订单";
   });
+}
+
+function handleDetail(row) {
+  currentOrder.value = row;
+  detailOpen.value = true;
+
 }
 
 /** 提交按钮 */
