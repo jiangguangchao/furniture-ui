@@ -27,7 +27,11 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="配送员" align="center" prop="workerId" />
+      <el-table-column label="配送员" align="center" prop="workerId" >
+        <template #default="scope">
+          <span>{{ getWorkerNameById(scope.row.workerId) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="配送时间" align="center" prop="deliveryTime" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.deliveryTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
@@ -65,6 +69,8 @@
           <el-date-picker clearable
             v-model="form.deliveryTime"
             type="datetime"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
             placeholder="请选择配送时间">
           </el-date-picker>
         </el-form-item>
@@ -94,6 +100,7 @@
 <script setup name="DeliveryRecord">
 import { listDeliveryRecord, getDeliveryRecord, delDeliveryRecord, addDeliveryRecord, updateDeliveryRecord } from "@/api/order/deliveryRecord";
 import useUserStore from '@/store/modules/user'
+import { ref, toRaw  } from "vue";
 const userStore = useUserStore()
 
 // 接收 props
@@ -117,8 +124,10 @@ const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
 
-const deliveryWorkers = userStore.getUserListByPostId(5);//配送员
-console.log("配送员 ", deliveryWorkers);
+const deliveryWorkers = userStore.userList.filter(item => item.postId == 5);
+deliveryWorkers.forEach(item => {
+  console.log("配送员 ", item.userName);
+});
 
 const data = reactive({
   form: {},
@@ -166,10 +175,6 @@ function reset() {
     orderId: null,
     deliveryTime: null,
     deliveryStatus: null,
-    createBy: null,
-    createTime: null,
-    updateBy: null,
-    updateTime: null,
     remark: null
   };
   proxy.resetForm("deliveryRecordRef");
@@ -250,6 +255,20 @@ function handleExport() {
   proxy.download('order/deliveryRecord/export', {
     ...queryParams.value
   }, `deliveryRecord_${new Date().getTime()}.xlsx`)
+}
+
+function getWorkerNameById(id) {
+  if (!id) {
+    return "";
+  }
+  console.log("根据id查询用户姓名 ", id);
+  console.log("用户列表 ", deliveryWorkers);
+  const user = deliveryWorkers.find(item => item.userId === id);
+  if (!user) {
+    return id;
+  } else {
+    return user.userName;
+  }
 }
 
 getList();
