@@ -10,12 +10,14 @@
         />
       </el-form-item>
       <el-form-item label="家具类别" prop="category">
-        <el-input
-          v-model="queryParams.category"
-          placeholder="请输入家具类别"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-select v-model="queryParams.category" placeholder="请选择家具类别" clearable>
+          <el-option
+            v-for="dict in fruniture_category"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="款式" prop="style">
         <el-input
@@ -26,12 +28,14 @@
         />
       </el-form-item>
       <el-form-item label="材质" prop="material">
-        <el-input
-          v-model="queryParams.material"
-          placeholder="请输入材质"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-select v-model="queryParams.material" placeholder="请选择材质" clearable>
+          <el-option
+            v-for="dict in furniture_material"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="尺寸" prop="size">
         <el-input
@@ -42,12 +46,14 @@
         />
       </el-form-item>
       <el-form-item label="床宽" prop="bedWidth">
-        <el-input
-          v-model="queryParams.bedWidth"
-          placeholder="请输入床宽"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+        <el-select v-model="queryParams.bedWidth" placeholder="请选择床宽" clearable>
+          <el-option
+            v-for="dict in bed_width"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="金额" prop="money">
         <el-input
@@ -109,12 +115,36 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="${comment}" align="center" prop="id" />
       <el-table-column label="订单号" align="center" prop="orderId" />
-      <el-table-column label="家具类别" align="center" prop="category" />
+      <el-table-column label="家具类别" align="center" prop="category">
+        <template #default="scope">
+          <dict-tag :options="fruniture_category" :value="scope.row.category"/>
+        </template>
+      </el-table-column>
       <el-table-column label="款式" align="center" prop="style" />
-      <el-table-column label="材质" align="center" prop="material" />
+      <el-table-column label="材质" align="center" prop="material">
+        <template #default="scope">
+          <dict-tag :options="furniture_material" :value="scope.row.material"/>
+        </template>
+      </el-table-column>
       <el-table-column label="尺寸" align="center" prop="size" />
-      <el-table-column label="床宽" align="center" prop="bedWidth" />
+      <el-table-column label="床宽" align="center" prop="bedWidth">
+        <template #default="scope">
+          <dict-tag :options="bed_width" :value="scope.row.bedWidth"/>
+        </template>
+      </el-table-column>
       <el-table-column label="金额" align="center" prop="money" />
+      <el-table-column label="创建者" align="center" prop="createBy" />
+      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="更新者" align="center" prop="updateBy" />
+      <el-table-column label="更新时间" align="center" prop="updateTime" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -139,19 +169,40 @@
           <el-input v-model="form.orderId" placeholder="请输入订单号" />
         </el-form-item>
         <el-form-item label="家具类别" prop="category">
-          <el-input v-model="form.category" placeholder="请输入家具类别" />
+          <el-select v-model="form.category" placeholder="请选择家具类别">
+            <el-option
+              v-for="dict in fruniture_category"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="款式" prop="style">
           <el-input v-model="form.style" placeholder="请输入款式" />
         </el-form-item>
         <el-form-item label="材质" prop="material">
-          <el-input v-model="form.material" placeholder="请输入材质" />
+          <el-select v-model="form.material" placeholder="请选择材质">
+            <el-option
+              v-for="dict in furniture_material"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="尺寸" prop="size">
           <el-input v-model="form.size" placeholder="请输入尺寸" />
         </el-form-item>
         <el-form-item label="床宽" prop="bedWidth">
-          <el-input v-model="form.bedWidth" placeholder="请输入床宽" />
+          <el-select v-model="form.bedWidth" placeholder="请选择床宽">
+            <el-option
+              v-for="dict in bed_width"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="金额" prop="money">
           <el-input v-model="form.money" placeholder="请输入金额" />
@@ -174,6 +225,7 @@
 import { listOrderFurniture, getOrderFurniture, delOrderFurniture, addOrderFurniture, updateOrderFurniture } from "@/api/order/orderFurniture";
 
 const { proxy } = getCurrentInstance();
+const { furniture_material, fruniture_category, bed_width } = proxy.useDict('furniture_material', 'fruniture_category', 'bed_width');
 
 const orderFurnitureList = ref([]);
 const open = ref(false);
@@ -203,7 +255,7 @@ const data = reactive({
       { required: true, message: "订单号不能为空", trigger: "blur" }
     ],
     category: [
-      { required: true, message: "家具类别不能为空", trigger: "blur" }
+      { required: true, message: "家具类别不能为空", trigger: "change" }
     ],
   }
 });

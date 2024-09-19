@@ -129,6 +129,7 @@ function handleLogin() {
         }, {});
         router.push({ path: redirect.value || "/", query: otherQueryParams });
         districtsStore.fetchDistricts();
+        userStore.fetchUserList();
       }).catch(() => {
         loading.value = false;
         // 重新获取验证码

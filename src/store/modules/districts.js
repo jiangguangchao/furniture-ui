@@ -9,7 +9,7 @@ const useDistrictsStore = defineStore('districts', {
   actions: {
     async fetchDistricts() {
       try {
-        const response = await listDistricts({"pageNum":1, "pageSize": 1000}); // 假设这是你的API调用
+        const response = await listDistricts({"pageNum":1, "pageSize": 1000});
         this.districts = response.rows; // 将API返回的数据赋值给 districts
       } catch (error) {
         console.error('Failed to fetch districts:', error);

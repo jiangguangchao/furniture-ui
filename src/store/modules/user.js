@@ -1,4 +1,5 @@
 import { login, logout, getInfo } from '@/api/login'
+import { selectAllPostUser } from '@/api/system/post'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import defAva from '@/assets/images/profile.jpg'
 
@@ -11,7 +12,8 @@ const useUserStore = defineStore(
       name: '',
       avatar: '',
       roles: [],
-      permissions: []
+      permissions: [],
+      userList: []
     }),
     actions: {
       // 登录
@@ -52,6 +54,22 @@ const useUserStore = defineStore(
           })
         })
       },
+
+      async fetchUserList() {
+        try {
+          const response = await selectAllPostUser();
+          this.userList = response.data;
+        } catch (error) {
+          console.error('Failed to fetch districts:', error);
+        }
+      },
+
+      //根据岗位id从userList中获取用户列表
+      getUserListByPostId(postId) {
+        return this.userList.filter(user => user.postId === postId);
+      },
+
+
       // 退出系统
       logOut() {
         return new Promise((resolve, reject) => {
