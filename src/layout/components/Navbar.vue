@@ -40,7 +40,7 @@
                 <span>退出登录</span>
               </el-dropdown-item>
               <el-dropdown-item divided command="relogin">
-                <span>自动重登</span>
+                <span>重新登录</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -101,10 +101,10 @@ function logout() {
 }
 
 function relogin() {
-  console.log("重新登录");
+  const oldHref = location.pathname;
   userStore.logOut();
   userStore.login({username: "admin",password: "admin123",}).then(() => {
-    // location.href = '/index';
+    location.href = oldHref;
   })
 }
 
