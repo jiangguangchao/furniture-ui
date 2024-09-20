@@ -20,9 +20,15 @@ const useDistrictsStore = defineStore('districts', {
   getters: {
     // 可以在这里定义一些 getter，例如获取特定级别的行政区划等
     getDistrictsByPCode() {
-      console.log("getDistrictsByPCode-----------------", this.districts)
       return (pCode) => {
         return this.districts.filter(district => district.pCode === pCode);
+      };
+    },
+
+    getNameByCode() {
+      return (code) => {
+        const district = this.districts.find(district => district.code === code);
+        return district ? district.name : '';
       };
     },
   },

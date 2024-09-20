@@ -7,7 +7,7 @@
     border
   >
     <template #extra>
-      <el-button type="primary">操作</el-button>
+      <el-button type="primary">刷新</el-button>
     </template>
 
     <el-descriptions-item label="订单ID">
@@ -15,62 +15,59 @@
     </el-descriptions-item>
 
     <el-descriptions-item label="总金额">
-      {{ order.total_money }} 元
+      {{ order.totalMoney }} 元
     </el-descriptions-item>
 
     <el-descriptions-item label="已支付金额">
-      {{ order.paid_money }} 元
+      {{ order.paidMoney }} 元
     </el-descriptions-item>
 
     <el-descriptions-item label="订单状态">
-      <el-tag :type="orderStatusType(order.order_status)" size="small">
-        {{ orderStatusText(order.order_status) }}
-      </el-tag>
+      <dict-tag :options="order_status" :value="order.orderStatus" />
     </el-descriptions-item>
 
     <el-descriptions-item label="下单时间">
-      {{ formatDateTime(order.order_time) }}
+      {{ parseTime(order.orderTime) }}
     </el-descriptions-item>
 
     <el-descriptions-item label="下单人">
-      {{ order.order_user }}
+      {{ order.orderUser }}
     </el-descriptions-item>
 
     <el-descriptions-item label="联系电话">
-      {{ order.phone_number }}
+      {{ order.phoneNumber }}
     </el-descriptions-item>
 
-    <el-descriptions-item label="区县">
+    <!-- <el-descriptions-item label="区县">
       {{ order.district }}
-    </el-descriptions-item>
+    </el-descriptions-item> -->
 
     <el-descriptions-item label="乡镇">
-      {{ order.town }}
+      {{ districtsStore.getNameByCode(order.town) }}
     </el-descriptions-item>
 
     <el-descriptions-item label="村委">
-      {{ order.village }}
+      {{ districtsStore.getNameByCode(order.village) }}
     </el-descriptions-item>
 
     <el-descriptions-item label="几队">
-      {{ order.dui || '无' }}
+      {{ order.dui || '-' }}
     </el-descriptions-item>
 
     <el-descriptions-item label="村庄">
-      {{ order.sub_village || '无' }}
+      {{ order.sub_village || '-' }}
     </el-descriptions-item>
 
     <el-descriptions-item label="创建时间">
-      {{ formatDateTime(order.create_time) }}
+      {{ parseTime(order.createTime) }}
     </el-descriptions-item>
 
     <el-descriptions-item label="创建人">
-      {{ order.create_user }}
+      {{ order.createUser }}
     </el-descriptions-item>
 
     <el-descriptions-item label="备注">
-      <el-tag v-if="order.remark" size="small" type="info">{{ order.remark }}</el-tag>
-      <span v-else>无</span>
+      <p>{{ order.remark || '-' }}</p>
     </el-descriptions-item>
   </el-descriptions>
 </template>
@@ -78,6 +75,12 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { ElTag, ElButton } from 'element-plus';
+import useDistrictsStore from "@/store/modules/districts";
+
+const districtsStore = useDistrictsStore();
+
+const { proxy } = getCurrentInstance();
+const { order_status } = proxy.useDict("order_status");
 
 // 接收 props
 const props = defineProps({
@@ -87,38 +90,7 @@ const props = defineProps({
   },
 });
 
-// 订单状态文本映射
-const orderStatusText = (status) => {
-  const statusMap = {
-    '0': '未开始',
-    '1': '待配送',
-    '2': '配送中',
-    '3': '已配送',
-    '5': '已完成',
-    '10': '已取消',
-  };
-  return statusMap[status] || '未知状态';
-};
 
-// 订单状态类型映射
-const orderStatusType = (status) => {
-  const typeMap = {
-    '0': 'warning',
-    '1': 'info',
-    '2': 'info',
-    '3': 'success',
-    '5': 'success',
-    '10': 'danger',
-  };
-  return typeMap[status] || 'info';
-};
-
-// 格式化日期时间
-const formatDateTime = (dateTime) => {
-  if (!dateTime) return '';
-  const date = new Date(dateTime);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-};
 </script>
 
 <style scoped>

@@ -207,22 +207,11 @@
         width="180"
       >
         <template #default="scope">
-          <span>{{ parseTime(scope.row.orderTime, "{y}-{m}-{d} {h}:{i}:{s}") }}</span>
+          <span>{{ parseTime(scope.row.orderTime) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="下单人" align="center" prop="orderUser" />
       <el-table-column label="联系电话" align="center" prop="phoneNumber" />
-      <!-- <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        width="180"
-      >
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.createTime, "{y}-{m}-{d} {h}:{i}:{s}") }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="创建人" align="center" prop="createUser" /> -->
       <el-table-column
         label="操作"
         align="center"
@@ -285,6 +274,8 @@
             clearable
             v-model="form.orderTime"
             type="datetime"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
             placeholder="请选择下单时间"
             :default-time="defaultTime"
           >
@@ -361,8 +352,8 @@ import {
   addFurnitureOrder,
   updateFurnitureOrder,
 } from "@/api/order/furnitureOrder";
-import useDistrictsStore from "@/store/modules/districts";
 import detailTab from "./detailTab.vue"
+import useDistrictsStore from "@/store/modules/districts";
 
 const districtsStore = useDistrictsStore();
 
@@ -388,7 +379,7 @@ const detailOpen = ref(false);
 const detailTitle = ref("订单详情");
 const currentOrder = ref({});
 
-const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));
+const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));//取平舆县的乡镇
 const villageArr = computed(() =>
   districtsStore.getDistrictsByPCode("411723103")
 );

@@ -64,6 +64,9 @@ import useAppStore from '@/store/modules/app'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
 
+import useDistrictsStore from '@/store/modules/districts'
+
+const districtsStore = useDistrictsStore()
 const appStore = useAppStore()
 const userStore = useUserStore()
 const settingsStore = useSettingsStore()
@@ -104,7 +107,10 @@ function relogin() {
   const oldHref = location.pathname;
   userStore.logOut();
   userStore.login({username: "admin",password: "admin123",}).then(() => {
-    location.href = oldHref;
+    
+    districtsStore.fetchDistricts();
+    userStore.fetchUserList();
+    ocation.href = oldHref;
   })
 }
 
