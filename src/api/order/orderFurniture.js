@@ -36,9 +36,10 @@ export function updateOrderFurniture(data) {
 }
 
 // 删除订单中家具
-export function delOrderFurniture(id) {
+export function delOrderFurniture(orderFurniture) {
   return request({
-    url: '/order/orderFurniture/' + id,
-    method: 'delete'
+    url: '/order/orderFurniture/delete',
+    method: 'delete',
+    data: orderFurniture
   })
 }

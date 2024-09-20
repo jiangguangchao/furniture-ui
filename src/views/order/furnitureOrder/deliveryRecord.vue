@@ -39,7 +39,7 @@
       </el-table-column>
       <el-table-column label="配送状态" align="center" prop="deliveryStatus">
         <template #default="scope">
-          <dict-tag :options="delivery_status" :value="scope.row.deliveryStatus"/>
+          <dict-tag :options="record_delivery_status" :value="scope.row.deliveryStatus"/>
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
@@ -77,7 +77,7 @@
         <el-form-item label="配送状态" prop="deliveryStatus">
           <el-radio-group v-model="form.deliveryStatus">
             <el-radio
-              v-for="dict in delivery_status"
+              v-for="dict in record_delivery_status"
               :key="dict.value"
               :label="dict.value"
             >{{dict.label}}</el-radio>
@@ -112,7 +112,7 @@ const props = defineProps({
 });
 
 const { proxy } = getCurrentInstance();
-const { delivery_status } = proxy.useDict('delivery_status');
+const { record_delivery_status } = proxy.useDict('record_delivery_status');
 
 const deliveryRecordList = ref([]);
 const open = ref(false);

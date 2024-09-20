@@ -15,14 +15,14 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="总金额" prop="totalMoney">
+      <!-- <el-form-item label="总金额" prop="totalMoney">
         <el-input
           v-model="queryParams.totalMoney"
           placeholder="请输入总金额"
           clearable
           @keyup.enter="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="订单状态" prop="orderStatus" style="width: 200px">
         <el-select
           v-model="queryParams.orderStatus"
@@ -31,6 +31,34 @@
         >
           <el-option
             v-for="dict in order_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="支付状态" prop="paymentStatus" style="width: 200px">
+        <el-select
+          v-model="queryParams.paymentStatus"
+          placeholder="请选择支付状态"
+          clearable
+        >
+          <el-option
+            v-for="dict in order_payment_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="配送状态" prop="deliveryStatus" style="width: 200px">
+        <el-select
+          v-model="queryParams.deliveryStatus"
+          placeholder="请选择配送状态"
+          clearable
+        >
+          <el-option
+            v-for="dict in order_delivery_status"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -160,6 +188,16 @@
       <el-table-column label="订单状态" align="center" prop="orderStatus">
         <template #default="scope">
           <dict-tag :options="order_status" :value="scope.row.orderStatus" />
+        </template>
+      </el-table-column>
+      <el-table-column label="支付状态" align="center" prop="paymentStatus">
+        <template #default="scope">
+          <dict-tag :options="order_payment_status" :value="scope.row.paymentStatus" />
+        </template>
+      </el-table-column>
+      <el-table-column label="配送状态" align="center" prop="deliveryStatus">
+        <template #default="scope">
+          <dict-tag :options="order_delivery_status" :value="scope.row.orderStatus" />
         </template>
       </el-table-column>
       <el-table-column
@@ -338,6 +376,8 @@ const districtsStore = useDistrictsStore();
 
 const { proxy } = getCurrentInstance();
 const { order_status } = proxy.useDict("order_status");
+const { order_delivery_status } = proxy.useDict("order_delivery_status");
+const { order_payment_status } = proxy.useDict("order_payment_status");
 
 const furnitureOrderList = ref([]);
 const open = ref(false);

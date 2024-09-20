@@ -36,9 +36,10 @@ export function updateDeliveryRecord(data) {
 }
 
 // 删除配送记录
-export function delDeliveryRecord(id) {
+export function delDeliveryRecord(record) {
   return request({
-    url: '/order/deliveryRecord/' + id,
-    method: 'delete'
+    url: '/order/deliveryRecord/delete',
+    method: 'delete',
+    data: record
   })
 }

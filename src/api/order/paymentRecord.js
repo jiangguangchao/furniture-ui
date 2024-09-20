@@ -36,9 +36,10 @@ export function updatePaymentRecord(data) {
 }
 
 // 删除支付记录
-export function delPaymentRecord(id) {
+export function delPaymentRecord(record) {
   return request({
-    url: '/order/paymentRecord/' + id,
-    method: 'delete'
+    url: '/order/paymentRecord/delete',
+    method: 'delete',
+    data: record
   })
 }
