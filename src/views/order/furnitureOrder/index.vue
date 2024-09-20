@@ -197,7 +197,7 @@
       </el-table-column>
       <el-table-column label="配送状态" align="center" prop="deliveryStatus">
         <template #default="scope">
-          <dict-tag :options="order_delivery_status" :value="scope.row.orderStatus" />
+          <dict-tag :options="order_delivery_status" :value="scope.row.deliveryStatus" />
         </template>
       </el-table-column>
       <el-table-column
@@ -244,14 +244,6 @@
             v-hasPermi="['order:furnitureOrder:edit']"
             >修改</el-button
           >
-          <el-button
-            link
-            type="primary"
-            icon="Delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['order:furnitureOrder:remove']"
-            >删除</el-button
-          >
         </template>
       </el-table-column>
     </el-table>
@@ -272,11 +264,11 @@
         :rules="rules"
         label-width="80px"
       >
-        <el-form-item label="总金额" prop="totalMoney">
-          <el-input v-model="form.totalMoney" placeholder="请输入总金额" />
+        <el-form-item label="总金额" prop="totalMoney" >
+          <el-input v-model="form.totalMoney" placeholder="请输入总金额" disabled/>
         </el-form-item>
-        <el-form-item label="已支付金额" prop="paidMoney">
-          <el-input v-model="form.paidMoney" placeholder="请输入已支付金额" />
+        <el-form-item label="已支付金额" prop="paidMoney" >
+          <el-input v-model="form.paidMoney" placeholder="请输入已支付金额" disabled/>
         </el-form-item>
         <el-form-item label="订单状态" prop="orderStatus">
           <el-select v-model="form.orderStatus" placeholder="请选择订单状态">
@@ -378,6 +370,7 @@ const { proxy } = getCurrentInstance();
 const { order_status } = proxy.useDict("order_status");
 const { order_delivery_status } = proxy.useDict("order_delivery_status");
 const { order_payment_status } = proxy.useDict("order_payment_status");
+console.log("订单所有状态 ", order_status)
 
 const furnitureOrderList = ref([]);
 const open = ref(false);
@@ -401,7 +394,9 @@ const villageArr = computed(() =>
 );
 
 const data = reactive({
-  form: {},
+  form: {
+    orderStatus: "1"
+  },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
@@ -415,12 +410,6 @@ const data = reactive({
     village: null,
   },
   rules: {
-    totalMoney: [
-      { required: true, message: "总金额不能为空", trigger: "blur" },
-    ],
-    paidMoney: [
-      { required: true, message: "已支付金额不能为空", trigger: "blur" },
-    ],
     orderStatus: [
       { required: true, message: "订单状态不能为空", trigger: "change" },
     ],
@@ -469,7 +458,7 @@ function reset() {
     id: null,
     totalMoney: null,
     paidMoney: null,
-    orderStatus: null,
+    orderStatus: "1",
     orderTime: null,
     orderUser: null,
     phoneNumber: null,
@@ -478,8 +467,6 @@ function reset() {
     village: null,
     dui: null,
     subVillage: null,
-    createTime: null,
-    createUser: null,
     remark: null,
   };
   proxy.resetForm("furnitureOrderRef");

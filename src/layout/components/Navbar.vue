@@ -39,6 +39,9 @@
               <el-dropdown-item divided command="logout">
                 <span>退出登录</span>
               </el-dropdown-item>
+              <el-dropdown-item divided command="relogin">
+                <span>自动重登</span>
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -77,6 +80,9 @@ function handleCommand(command) {
     case "logout":
       logout();
       break;
+    case "relogin":
+      relogin();
+      break;
     default:
       break;
   }
@@ -92,6 +98,14 @@ function logout() {
       location.href = '/index';
     })
   }).catch(() => { });
+}
+
+function relogin() {
+  console.log("重新登录");
+  userStore.logOut();
+  userStore.login({username: "admin",password: "admin123",}).then(() => {
+    // location.href = '/index';
+  })
 }
 
 const emits = defineEmits(['setLayout'])
