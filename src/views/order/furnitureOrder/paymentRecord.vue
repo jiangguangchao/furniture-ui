@@ -10,7 +10,6 @@
           v-hasPermi="['order:paymentRecord:add']"
         >新增</el-button>
       </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="paymentRecordList" @selection-change="handleSelectionChange" border>
@@ -32,6 +31,11 @@
         </template>
       </el-table-column>
       <el-table-column label="支付金额" align="center" prop="paymentAmount" />
+      <el-table-column label="支付方式" align="center" prop="paymentMethod">
+        <template #default="scope">
+          <dict-tag :options="payment_method" :value="scope.row.paymentMethod" />
+        </template>
+      </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -48,11 +52,18 @@
           <el-date-picker clearable
             v-model="form.paymentTime"
             type="datetime"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
             placeholder="请选择支付时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="支付金额" prop="paymentAmount">
           <el-input v-model="form.paymentAmount" placeholder="请输入支付金额" />
+        </el-form-item>
+        <el-form-item label="支付方式" prop="paymentMethod">
+          <el-select v-model="form.paymentMethod" placeholder="请选择支付方式">
+            <el-option v-for="dict in payment_method" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
+          </el-select>
         </el-form-item>
         
         <el-form-item label="备注" prop="remark">
@@ -71,6 +82,8 @@
 
 <script setup name="PaymentRecord">
 import { listPaymentRecord, getPaymentRecord, delPaymentRecord, addPaymentRecord, updatePaymentRecord } from "@/api/order/paymentRecord";
+import { parseTime } from "@/utils/ruoyi";
+
 
 // 接收 props
 const props = defineProps({
@@ -81,6 +94,7 @@ const props = defineProps({
 });
 
 const { proxy } = getCurrentInstance();
+const { payment_method } = proxy.useDict("payment_method");
 
 const paymentRecordList = ref([]);
 const open = ref(false);
@@ -136,12 +150,9 @@ function reset() {
   form.value = {
     id: null,
     orderId: null,
-    paymentTime: null,
+    paymentTime:  parseTime(new Date()),
+    paymentMethod: null,
     paymentAmount: null,
-    createBy: null,
-    createTime: null,
-    updateBy: null,
-    updateTime: null,
     remark: null
   };
   proxy.resetForm("paymentRecordRef");

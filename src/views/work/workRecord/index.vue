@@ -104,7 +104,11 @@
     <el-table v-loading="loading" :data="workRecordList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="记录编号" align="center" prop="id" />
-      <el-table-column label="员工编号" align="center" prop="workerId" />
+      <el-table-column label="员工编号" align="center" prop="workerId">
+        <template #default="scope">
+          <span>{{ userStore.getUserNameById(scope.row.workerId) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="工作日期" align="center" prop="workDate" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.workDate, '{y}-{m}-{d}') }}</span>
@@ -197,7 +201,8 @@
 
 <script setup name="WorkRecord">
 import { listWorkRecord, getWorkRecord, delWorkRecord, addWorkRecord, updateWorkRecord } from "@/api/work/workRecord";
-
+import useUserStore from '@/store/modules/user'
+const userStore = useUserStore()
 const { proxy } = getCurrentInstance();
 const { work_period } = proxy.useDict('work_period');
 

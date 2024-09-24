@@ -225,14 +225,14 @@
             @click="handleDetail(scope.row)"
             >详情</el-button
           >
-          <el-button
+          <!-- <el-button
             link
             type="primary"
             icon="Edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['order:furnitureOrder:edit']"
             >修改</el-button
-          >
+          > -->
         </template>
       </el-table-column>
     </el-table>
@@ -341,6 +341,10 @@
     <el-dialog :title="detailTitle" v-model="detailOpen" width="800px" append-to-body>
       <detailTab :order="currentOrder" />
     </el-dialog>
+    <!-- <el-drawer v-model="drawer" title="I am the title" size="60%">
+      <detailTab :order="currentOrder" />
+    </el-drawer> -->
+    
   </div>
 </template>
 
@@ -361,7 +365,6 @@ const { proxy } = getCurrentInstance();
 const { order_status } = proxy.useDict("order_status");
 const { order_delivery_status } = proxy.useDict("order_delivery_status");
 const { order_payment_status } = proxy.useDict("order_payment_status");
-console.log("订单所有状态 ", order_status)
 
 const furnitureOrderList = ref([]);
 const open = ref(false);
@@ -374,6 +377,7 @@ const total = ref(0);
 const title = ref("");
 const daterangeOrderTime = ref([]);
 const defaultTime = new Date(2000, 1, 1, 12, 0, 0);
+
 
 const detailOpen = ref(false);
 const detailTitle = ref("订单详情");
@@ -408,15 +412,6 @@ const data = reactive({
     phoneNumber: [
       { required: true, message: "联系电话不能为空", trigger: "blur" },
     ],
-    // district: [
-    //   { required: true, message: "区县不能为空", trigger: "change" }
-    // ],
-    // town: [
-    //   { required: true, message: "乡镇不能为空", trigger: "change" }
-    // ],
-    // village: [
-    //   { required: true, message: "村委不能为空", trigger: "change" }
-    // ],
   },
 });
 

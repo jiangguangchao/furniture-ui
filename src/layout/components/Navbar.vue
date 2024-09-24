@@ -110,7 +110,7 @@ function relogin() {
     
     districtsStore.fetchDistricts();
     userStore.fetchUserList();
-    ocation.href = oldHref;
+    location.href = oldHref;
   })
 }
 

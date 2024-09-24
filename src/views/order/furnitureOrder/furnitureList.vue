@@ -2,27 +2,12 @@
   <div class="app-container">
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-          v-hasPermi="['order:orderFurniture:add']"
-          >新增</el-button
-        >
+        <el-button type="primary" plain icon="Plus" @click="handleAdd"
+          v-hasPermi="['order:orderFurniture:add']">新增</el-button>
       </el-col>
-      <right-toolbar
-        v-model:showSearch="showSearch"
-        @queryTable="getList"
-      ></right-toolbar>
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="orderFurnitureList"
-      @selection-change="handleSelectionChange"
-      border
-    >
+    <el-table v-loading="loading" :data="orderFurnitureList" @selection-change="handleSelectionChange" border>
       <el-table-column type="expand">
         <template #default="props">
           <div m="4">
@@ -35,7 +20,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="家具类别" align="center" prop="category" >
+      <el-table-column label="家具类别" align="center" prop="category">
         <template #default="scope">
           <dict-tag :options="fruniture_category" :value="scope.row.category" />
         </template>
@@ -45,70 +30,41 @@
           <dict-tag :options="furniture_material" :value="scope.row.material" />
         </template>
       </el-table-column>
-      <el-table-column label="尺寸" align="center" prop="size" />
+      <el-table-column label="尺寸" align="center" prop="size" >
+        <template #default="scope">
+          {{ scope.row.size ? scope.row.size + '米' : '' }}
+        </template>
+      </el-table-column>
       <el-table-column label="金额" align="center" prop="money" />
       <el-table-column label="备注" align="center" prop="remark" />
 
-      
-      <el-table-column
-        label="操作"
-        align="center"
-        class-name="small-padding fixed-width"
-      >
+
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            icon="Edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['order:orderFurniture:edit']"
-            >修改</el-button
-          >
-          <el-button
-            link
-            type="primary"
-            icon="Delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['order:orderFurniture:remove']"
-            >删除</el-button
-          >
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
+            v-hasPermi="['order:orderFurniture:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['order:orderFurniture:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 添加或修改订单中家具对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form
-        ref="orderFurnitureRef"
-        :model="form"
-        :rules="rules"
-        label-width="80px"
-      >
+      <el-form ref="orderFurnitureRef" :model="form" :rules="rules" label-width="80px">
         <!-- <el-form-item label="订单号" prop="orderId">
           <el-input v-model="form.orderId" placeholder="请输入订单号" />
         </el-form-item> -->
         <el-form-item label="家具类别" prop="category">
-          <el-select
-            v-model="form.category"
-            placeholder="请选择家具类别"
-            @change="categoryChange"
-          >
-            <el-option
-              v-for="dict in fruniture_category"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
+          <el-select v-model="form.category" placeholder="请选择家具类别" @change="categoryChange">
+            <el-option v-for="dict in fruniture_category" :key="dict.value" :label="dict.label"
+              :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="材质" prop="material">
           <el-select v-model="form.material" placeholder="请选择材质">
-            <el-option
-              v-for="dict in furniture_material"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
+            <el-option v-for="dict in furniture_material" :key="dict.value" :label="dict.label"
+              :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="尺寸" prop="size" v-show="!isBed">
@@ -116,23 +72,14 @@
         </el-form-item>
         <el-form-item label="尺寸" prop="bedWidth" v-show="isBed">
           <el-select v-model="form.bedWidth" placeholder="请选择床宽">
-            <el-option
-              v-for="dict in bed_width"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
+            <el-option v-for="dict in bed_width" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="金额" prop="money">
           <el-input v-model="form.money" placeholder="请输入金额" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
-          <el-input
-            v-model="form.remark"
-            type="textarea"
-            placeholder="请输入内容"
-          />
+          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -222,10 +169,6 @@ function reset() {
     size: null,
     bedWidth: null,
     money: null,
-    createBy: null,
-    createTime: null,
-    updateBy: null,
-    updateTime: null,
     remark: null,
   };
   proxy.resetForm("orderFurnitureRef");
@@ -260,12 +203,10 @@ function handleAdd() {
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
-  const _id = row.id || ids.value;
-  getOrderFurniture(_id).then((response) => {
-    form.value = response.data;
-    open.value = true;
-    title.value = "修改订单中家具";
-  });
+  categoryChange(row.category);
+  form.value = row;
+  open.value = true;
+  title.value = "修改订单中家具";
 }
 
 function categoryChange(value) {
@@ -317,7 +258,7 @@ function handleDelete(row) {
       getList();
       proxy.$modal.msgSuccess("删除成功");
     })
-    .catch(() => {});
+    .catch(() => { });
 }
 
 /** 导出按钮操作 */

@@ -8,6 +8,7 @@
   >
     <template #extra>
       <el-button type="primary">刷新</el-button>
+      <el-button type="primary" @click="handleUpdate()">修改</el-button>
     </template>
 
     <el-descriptions-item label="订单ID">
@@ -70,17 +71,24 @@
       <p>{{ order.remark || '-' }}</p>
     </el-descriptions-item>
   </el-descriptions>
+
+  <el-dialog title="修改订单" v-model="open" width="500px" append-to-body>
+    <orderEdit :order="order" />
+  </el-dialog>
+
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import { ElTag, ElButton } from 'element-plus';
 import useDistrictsStore from "@/store/modules/districts";
+import orderEdit from "./orderEdit";
 
 const districtsStore = useDistrictsStore();
 
 const { proxy } = getCurrentInstance();
 const { order_status } = proxy.useDict("order_status");
+const open = ref(false);
 
 // 接收 props
 const props = defineProps({
@@ -89,6 +97,11 @@ const props = defineProps({
     required: true,
   },
 });
+
+/** 修改按钮操作 */
+function handleUpdate() {
+  open.value = true;
+}
 
 
 </script>

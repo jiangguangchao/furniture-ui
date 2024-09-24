@@ -69,6 +69,12 @@ const useUserStore = defineStore(
         return this.userList.filter(user => user.postId === postId);
       },
 
+      //根据id获取名称
+      getUserNameById(id) {
+        var u = this.userList.find(user => user.userId === id);
+        return u ? u.userName : '';
+      },
+
 
       // 退出系统
       logOut() {

@@ -11,7 +11,6 @@
           v-hasPermi="['order:deliveryRecord:add']"
         >新增</el-button>
       </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="deliveryRecordList" @selection-change="handleSelectionChange">
@@ -21,20 +20,20 @@
             <p m="t-0 b-2">配送编号: {{ props.row.id }}</p>
             <p m="t-0 b-2">订单编号: {{ props.row.orderId }}</p>
             <p m="t-0 b-2">创建者: {{ props.row.createBy }}</p>
-            <p m="t-0 b-2">创建时间: {{ parseTime(props.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</p>
+            <p m="t-0 b-2">创建时间: {{ parseTime(props.row.createTime) }}</p>
             <p m="t-0 b-2">更新者: {{ props.row.updateBy }}</p>
-            <p m="t-0 b-2">更新时间: {{ parseTime(props.row.updateTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</p>
+            <p m="t-0 b-2">更新时间: {{ parseTime(props.row.updateTime) }}</p>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="配送员" align="center" prop="workerId" >
         <template #default="scope">
-          <span>{{ getWorkerNameById(scope.row.workerId) }}</span>
+          <span>{{ userStore.getUserNameById(scope.row.workerId) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="配送时间" align="center" prop="deliveryTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.deliveryTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <span>{{ parseTime(scope.row.deliveryTime) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="配送状态" align="center" prop="deliveryStatus">
@@ -100,6 +99,7 @@
 <script setup name="DeliveryRecord">
 import { listDeliveryRecord, getDeliveryRecord, delDeliveryRecord, addDeliveryRecord, updateDeliveryRecord } from "@/api/order/deliveryRecord";
 import useUserStore from '@/store/modules/user'
+import { parseTime } from "@/utils/ruoyi";
 import { ref, toRaw  } from "vue";
 const userStore = useUserStore()
 
@@ -173,7 +173,7 @@ function reset() {
   form.value = {
     id: null,
     orderId: null,
-    deliveryTime: null,
+    deliveryTime: parseTime(new Date()),
     deliveryStatus: null,
     remark: null
   };
@@ -257,19 +257,6 @@ function handleExport() {
   }, `deliveryRecord_${new Date().getTime()}.xlsx`)
 }
 
-function getWorkerNameById(id) {
-  if (!id) {
-    return "";
-  }
-  console.log("根据id查询用户姓名 ", id);
-  console.log("用户列表 ", deliveryWorkers);
-  const user = deliveryWorkers.find(item => item.userId === id);
-  if (!user) {
-    return id;
-  } else {
-    return user.userName;
-  }
-}
 
 getList();
 </script>
