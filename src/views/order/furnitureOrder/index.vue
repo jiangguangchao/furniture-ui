@@ -358,6 +358,7 @@ import {
 } from "@/api/order/furnitureOrder";
 import detailTab from "./detailTab.vue"
 import useDistrictsStore from "@/store/modules/districts";
+import { eventBus } from "@/utils/eventBus";
 
 const districtsStore = useDistrictsStore();
 
@@ -548,6 +549,14 @@ function handleExport() {
     `furnitureOrder_${new Date().getTime()}.xlsx`
   );
 }
+
+onMounted(() => {
+  eventBus.on('orderUpdated', getList);
+});
+
+onUnmounted(() => {
+  eventBus.off('orderUpdated', getList);
+});
 
 getList();
 </script>

@@ -12,31 +12,31 @@
     </template>
 
     <el-descriptions-item label="订单ID">
-      {{ order.id }}
+      {{ localOrder.id }}
     </el-descriptions-item>
 
     <el-descriptions-item label="总金额">
-      {{ order.totalMoney }} 元
+      {{ localOrder.totalMoney }} 元
     </el-descriptions-item>
 
     <el-descriptions-item label="已支付金额">
-      {{ order.paidMoney }} 元
+      {{ localOrder.paidMoney }} 元
     </el-descriptions-item>
 
     <el-descriptions-item label="订单状态">
-      <dict-tag :options="order_status" :value="order.orderStatus" />
+      <dict-tag :options="order_status" :value="localOrder.orderStatus" />
     </el-descriptions-item>
 
     <el-descriptions-item label="下单时间">
-      {{ parseTime(order.orderTime) }}
+      {{ parseTime(localOrder.orderTime) }}
     </el-descriptions-item>
 
     <el-descriptions-item label="下单人">
-      {{ order.orderUser }}
+      {{ localOrder.orderUser }}
     </el-descriptions-item>
 
     <el-descriptions-item label="联系电话">
-      {{ order.phoneNumber }}
+      {{ localOrder.phoneNumber }}
     </el-descriptions-item>
 
     <!-- <el-descriptions-item label="区县">
@@ -44,31 +44,31 @@
     </el-descriptions-item> -->
 
     <el-descriptions-item label="乡镇">
-      {{ districtsStore.getNameByCode(order.town) }}
+      {{ districtsStore.getNameByCode(localOrder.town) }}
     </el-descriptions-item>
 
     <el-descriptions-item label="村委">
-      {{ districtsStore.getNameByCode(order.village) }}
+      {{ districtsStore.getNameByCode(localOrder.village) }}
     </el-descriptions-item>
 
     <el-descriptions-item label="几队">
-      {{ order.dui || '-' }}
+      {{ localOrder.dui || '-' }}
     </el-descriptions-item>
 
     <el-descriptions-item label="村庄">
-      {{ order.sub_village || '-' }}
+      {{ localOrder.sub_village || '-' }}
     </el-descriptions-item>
 
     <el-descriptions-item label="创建时间">
-      {{ parseTime(order.createTime) }}
+      {{ parseTime(localOrder.createTime) }}
     </el-descriptions-item>
 
     <el-descriptions-item label="创建人">
-      {{ order.createUser }}
+      {{ localOrder.createUser }}
     </el-descriptions-item>
 
     <el-descriptions-item label="备注">
-      <p>{{ order.remark || '-' }}</p>
+      <p>{{ localOrder.remark || '-' }}</p>
     </el-descriptions-item>
   </el-descriptions>
 
@@ -83,6 +83,8 @@ import { ref, computed } from 'vue';
 import { ElTag, ElButton } from 'element-plus';
 import useDistrictsStore from "@/store/modules/districts";
 import orderEdit from "./orderEdit";
+import { eventBus } from "@/utils/eventBus";
+import { getFurnitureOrder } from '@/api/order/furnitureOrder';
 
 const districtsStore = useDistrictsStore();
 
@@ -97,12 +99,31 @@ const props = defineProps({
     required: true,
   },
 });
+const localOrder = ref({ ...props.order });
 
 /** 修改按钮操作 */
 function handleUpdate() {
   open.value = true;
 }
 
+function getById() {
+  console.log("根据id查询订单信息， id:", props.order.id)
+  getFurnitureOrder(props.order.id).then(response => {
+    console.log(response);
+    // props.order = response.data;
+    // console.log("order:", props.order)
+    localOrder.value = { ...response.data }
+  })
+}
+
+
+onMounted(() => {
+  eventBus.on('orderUpdated', getById);
+});
+
+onUnmounted(() => {
+  eventBus.off('orderUpdated', getById);
+});
 
 </script>
 

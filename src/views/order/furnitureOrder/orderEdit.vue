@@ -60,6 +60,8 @@ import {
   updateFurnitureOrder,
 } from "@/api/order/furnitureOrder";
 import useDistrictsStore from "@/store/modules/districts";
+// import { eventBus } from "../../../utils/eventBus";
+import { eventBus } from "@/utils/eventBus";
 const districtsStore = useDistrictsStore();
 const { proxy } = getCurrentInstance();
 
@@ -71,13 +73,17 @@ const props = defineProps({
     },
 });
 
+
+// 使用 toRefs 将 reactive 对象转换为普通对象
+const copyOrder = toRefs(reactive({ ...props.order }));
+
 const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));//取平舆县的乡镇
 const villageArr = computed(() =>
   districtsStore.getDistrictsByPCode("411723103")
 );
 
 const data = reactive({
-    form: props.order,
+    form: copyOrder,
     queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -137,12 +143,13 @@ function submitForm() {
         updateFurnitureOrder(form.value).then((response) => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
+          eventBus.emit("orderUpdated")
         });
       } else {
         addFurnitureOrder(form.value).then((response) => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
-          getList();
+          eventBus.emit("orderUpdated")
         });
       }
     }
