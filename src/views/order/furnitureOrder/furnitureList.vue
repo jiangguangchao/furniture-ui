@@ -100,6 +100,7 @@ import {
   addOrderFurniture,
   updateOrderFurniture,
 } from "@/api/order/orderFurniture";
+import { eventBus } from "@/utils/eventBus";
 
 // 接收 props
 const props = defineProps({
@@ -232,6 +233,7 @@ function submitForm() {
         updateOrderFurniture(form.value).then((response) => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
+          eventBus.emit("orderUpdated");
           getList();
         });
       } else {
@@ -239,6 +241,7 @@ function submitForm() {
         addOrderFurniture(form.value).then((response) => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
+          eventBus.emit("orderUpdated");
           getList();
         });
       }
@@ -257,6 +260,7 @@ function handleDelete(row) {
     .then(() => {
       getList();
       proxy.$modal.msgSuccess("删除成功");
+      eventBus.emit("orderUpdated")
     })
     .catch(() => { });
 }
