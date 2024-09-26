@@ -386,7 +386,7 @@ const currentOrder = ref({});
 
 const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));//取平舆县的乡镇
 const villageArr = computed(() =>
-  districtsStore.getDistrictsByPCode("411723103")
+  districtsStore.getDistrictsByPCode("411723103")//庙湾的所有村委
 );
 
 const data = reactive({
