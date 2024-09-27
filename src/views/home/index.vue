@@ -3,16 +3,7 @@
     <el-row :gutter="20">
       <!-- 第一行 -->
       <el-col :span="24">
-        <el-card class="box-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <span>未完成订单</span>
-            </div>
-          </template>
-          <div>
-            <order-list />
-          </div>
-        </el-card>
+        <order-list />
       </el-col>
     </el-row>
     <el-row :gutter="20" style="margin-top: 20px;">
@@ -49,7 +40,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import orderList from '@/views/order/furnitureOrder/index.vue'
+import orderList from './orderList.vue'
 
 // 模拟数据
 const incompleteOrders = ref([
