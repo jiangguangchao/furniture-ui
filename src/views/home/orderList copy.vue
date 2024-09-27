@@ -2,58 +2,58 @@
   <el-card class="box-card" shadow="hover">
     <template #header>
       <div class="card-header">
-        <el-collapse v-model="activeNames" style="width: 100%; border: 0; border-bottom: 0;">
-          <el-collapse-item title="未完成订单" name="1">
-            <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px"
-              class="search-form">
-              <el-form-item label="订单编号" prop="id">
-                <el-input v-model="queryParams.id" placeholder="请输入订单编号" clearable @keyup.enter="handleQuery" />
-              </el-form-item>
-              <el-form-item label="订单状态" prop="orderStatus" style="width: 200px">
-                <el-select v-model="queryParams.orderStatus" placeholder="请选择订单状态" clearable>
-                  <el-option v-for="dict in order_status" :key="dict.value" :label="dict.label" :value="dict.value" />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="支付状态" prop="paymentStatus" style="width: 200px">
-                <el-select v-model="queryParams.paymentStatus" placeholder="请选择支付状态" clearable>
-                  <el-option v-for="dict in order_payment_status" :key="dict.value" :label="dict.label"
-                    :value="dict.value" />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="配送状态" prop="deliveryStatus" style="width: 200px">
-                <el-select v-model="queryParams.deliveryStatus" placeholder="请选择配送状态" clearable>
-                  <el-option v-for="dict in order_delivery_status" :key="dict.value" :label="dict.label"
-                    :value="dict.value" />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="下单时间" style="width: 308px">
-                <el-date-picker v-model="daterangeOrderTime" value-format="YYYY-MM-DD" type="daterange"
-                  range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
-              </el-form-item>
-              <el-form-item label="下单人" prop="orderUser">
-                <el-input v-model="queryParams.orderUser" placeholder="请输入下单人" clearable @keyup.enter="handleQuery" />
-              </el-form-item>
-              <el-form-item label="联系电话" prop="phoneNumber">
-                <el-input v-model="queryParams.phoneNumber" placeholder="请输入联系电话" clearable
-                  @keyup.enter="handleQuery" />
-              </el-form-item>
-              <el-form-item label="乡镇" prop="town" style="width: 200px">
-                <el-select v-model="queryParams.town" placeholder="请选择乡镇" clearable>
-                  <el-option v-for="t in townArr" :key="t.code" :label="t.name" :value="t.code" />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="村委" prop="village" style="width: 200px">
-                <el-select v-model="queryParams.village" placeholder="请选择村委" clearable>
-                  <el-option v-for="t in villageArr" :key="t.code" :label="t.name" :value="t.code" />
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-              </el-form-item>
-            </el-form>
-          </el-collapse-item>
-        </el-collapse>
-
+        <span>未完成订单</span>
+        <!-- 搜索图标 -->
+        <el-popover placement="right" :width="400" trigger="click">
+          <template #reference>
+            <el-button style="margin-right: 16px">Click to activate</el-button>
+          </template>
+          <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="search-form">
+            <el-form-item label="订单编号" prop="id">
+              <el-input v-model="queryParams.id" placeholder="请输入订单编号" clearable @keyup.enter="handleQuery" />
+            </el-form-item>
+            <el-form-item label="订单状态" prop="orderStatus" style="width: 200px">
+              <el-select v-model="queryParams.orderStatus" placeholder="请选择订单状态" clearable>
+                <el-option v-for="dict in order_status" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="支付状态" prop="paymentStatus" style="width: 200px">
+              <el-select v-model="queryParams.paymentStatus" placeholder="请选择支付状态" clearable>
+                <el-option v-for="dict in order_payment_status" :key="dict.value" :label="dict.label"
+                  :value="dict.value" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="配送状态" prop="deliveryStatus" style="width: 200px">
+              <el-select v-model="queryParams.deliveryStatus" placeholder="请选择配送状态" clearable>
+                <el-option v-for="dict in order_delivery_status" :key="dict.value" :label="dict.label"
+                  :value="dict.value" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="下单时间" style="width: 308px">
+              <el-date-picker v-model="daterangeOrderTime" value-format="YYYY-MM-DD" type="daterange"
+                range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+            </el-form-item>
+            <el-form-item label="下单人" prop="orderUser">
+              <el-input v-model="queryParams.orderUser" placeholder="请输入下单人" clearable @keyup.enter="handleQuery" />
+            </el-form-item>
+            <el-form-item label="联系电话" prop="phoneNumber">
+              <el-input v-model="queryParams.phoneNumber" placeholder="请输入联系电话" clearable @keyup.enter="handleQuery" />
+            </el-form-item>
+            <el-form-item label="乡镇" prop="town" style="width: 200px">
+              <el-select v-model="queryParams.town" placeholder="请选择乡镇" clearable>
+                <el-option v-for="t in townArr" :key="t.code" :label="t.name" :value="t.code" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="村委" prop="village" style="width: 200px">
+              <el-select v-model="queryParams.village" placeholder="请选择村委" clearable>
+                <el-option v-for="t in villageArr" :key="t.code" :label="t.name" :value="t.code" />
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+            </el-form-item>
+          </el-form>
+        </el-popover>
       </div>
     </template>
     <el-table v-loading="loading" :data="furnitureOrderList">
@@ -164,7 +164,6 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data);
 
-const activeNames = ref([''])
 const isOverlayVisible = ref(false);
 
 function getList() {
@@ -188,7 +187,6 @@ function handleDetail(row) {
 
 /** 搜索按钮操作 */
 function handleQuery() {
-  activeNames.value = ['']
   queryParams.value.pageNum = 1;
   getList();
 }
@@ -230,5 +228,7 @@ getList();
 .item {
   margin-bottom: 18px;
 } */
-
+.search-form {
+  background-color: #798882;
+}
 </style>
