@@ -70,7 +70,6 @@
     </el-row>
 
     <el-table v-loading="loading" :data="purchaseOrderList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="供货方" align="center" prop="supplier" />
       <el-table-column label="日期" align="center" prop="purchaseDate" width="180">
@@ -105,7 +104,7 @@
     />
 
     <!-- 添加或修改进货单对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
+    <!-- <el-dialog :title="title" :inline="true" v-model="open" width="500px" append-to-body>
       <el-form ref="purchaseOrderRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="供货方" prop="supplier">
           <el-input v-model="form.supplier" placeholder="请输入供货方" />
@@ -146,12 +145,121 @@
           <el-button @click="cancel">取 消</el-button>
         </div>
       </template>
-    </el-dialog>
+    </el-dialog> -->
+
+    <el-dialog :title="title" :inline="true" v-model="open" width="700px" append-to-body>
+    <el-form ref="purchaseOrderRef" :model="form" :rules="rules" label-width="80px">
+      <!-- 上半部分：输入供货方、手机等信息 -->
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="供货方" prop="supplier">
+            <el-input v-model="form.supplier" placeholder="请输入供货方" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="日期" prop="purchaseDate">
+            <el-date-picker clearable
+              v-model="form.purchaseDate"
+              type="datetime"
+              format="YYYY-MM-DD HH:mm:ss"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              placeholder="请选择日期">
+            </el-date-picker>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="到货状态" prop="arrivalStatus">
+            <el-select v-model="form.arrivalStatus">
+              <el-option
+                v-for="dict in purchase_arrival_status"
+                :key="dict.value" :label="dict.label" :value="dict.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="手机" prop="phone">
+            <el-input v-model="form.phone" placeholder="请输入手机" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="微信" prop="weichat">
+            <el-input v-model="form.weichat" placeholder="请输入微信" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="总金额" prop="totalAmount">
+            <el-input v-model="form.totalAmount" placeholder="请输入总金额" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-form-item label="备注" prop="remarks">
+        <el-input v-model="form.remarks" type="textarea" placeholder="请输入内容" />
+      </el-form-item>
+      <ImageUpload></ImageUpload>
+      <!-- 下半部分：进货明细表格 -->
+      <div class="goods-list">
+        <el-button type="primary" @click="handleGoodsAdd" style="margin-bottom: 10px;">新增</el-button>
+        <el-table :data="form.goodsList" style="width: 100%">
+          <el-table-column prop="name" label="名称" >
+          </el-table-column>
+          <el-table-column prop="unitPrice" label="单价">
+          </el-table-column>
+          <el-table-column prop="quantity" label="数量">
+          </el-table-column>
+          <el-table-column prop="totalPrice" label="总价">
+          </el-table-column>
+          <el-table-column label="操作" width="100">
+            <template #default="scope">
+              <el-button size="mini" type="danger" @click="removeGoods(scope.$index)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </el-form>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <el-dialog title="新增明细" v-model="addGoodsOpen" width="400">
+    <el-form ref="goodsFormRef" :model="goodsForm" label-width="80px">
+      <el-form-item label="名称" prop="name">
+        <el-input v-model="goodsForm.name" placeholder="请输入名称" />
+      </el-form-item>
+      <el-form-item label="单价" prop="unitPrice">
+        <el-input v-model.number="goodsForm.unitPrice" placeholder="请输入单价" />
+      </el-form-item>
+      <el-form-item label="数量" prop="quantity">
+        <el-input v-model.number="goodsForm.quantity" placeholder="请输入数量" />
+      </el-form-item>
+      <el-form-item label="总价" prop="totalPrice">
+        <el-input v-model.number="goodsForm.totalPrice" placeholder="请输入总价" />
+      </el-form-item>
+    </el-form>
+    
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="primary" @click="addGoods">确 定</el-button>
+        <el-button @click="cancelGoods">取 消</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
   </div>
 </template>
 
 <script setup name="PurchaseOrder">
 import { listPurchaseOrder, getPurchaseOrder, delPurchaseOrder, addPurchaseOrder, updatePurchaseOrder } from "@/api/purchase/purchaseOrder";
+import { parseTime } from "@/utils/ruoyi";
 
 const { proxy } = getCurrentInstance();
 const { purchase_arrival_status } = proxy.useDict('purchase_arrival_status');
@@ -189,6 +297,8 @@ const data = reactive({
 });
 
 const { queryParams, form, rules } = toRefs(data);
+const goodsForm = ref({});
+const addGoodsOpen = ref(false);
 
 /** 查询进货单列表 */
 function getList() {
@@ -216,12 +326,13 @@ function reset() {
   form.value = {
     id: null,
     supplier: null,
-    purchaseDate: null,
-    arrivalStatus: null,
+    purchaseDate: parseTime(new Date()),
+    arrivalStatus: '0',
     phone: null,
     weichat: null,
     orderList: null,
     totalAmount: null,
+    goodsList: [],
     remarks: null
   };
   proxy.resetForm("purchaseOrderRef");
@@ -260,6 +371,7 @@ function handleUpdate(row) {
   const _id = row.id || ids.value
   getPurchaseOrder(_id).then(response => {
     form.value = response.data;
+    form.value.goodsList = form.value.goodsList ? JSON.parse(form.value.goodsList) : [];
     open.value = true;
     title.value = "修改进货单";
   });
@@ -269,6 +381,9 @@ function handleUpdate(row) {
 function submitForm() {
   proxy.$refs["purchaseOrderRef"].validate(valid => {
     if (valid) {
+
+      form.value.goodsList = JSON.stringify(form.value.goodsList);
+
       if (form.value.id != null) {
         updatePurchaseOrder(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
@@ -302,6 +417,28 @@ function handleExport() {
   proxy.download('purchase/purchaseOrder/export', {
     ...queryParams.value
   }, `purchaseOrder_${new Date().getTime()}.xlsx`)
+}
+
+function handleGoodsAdd() {
+  goodsForm.value = {
+    name: '',
+    unitPrice: '',
+    quantity: '',
+    totalPrice: ''
+  };
+  console.log("打开新增明细弹窗")
+  addGoodsOpen.value = true;
+}
+
+function addGoods() {
+  if (!goodsForm.value.name || !goodsForm.value.unitPrice || !goodsForm.value.quantity) {
+    return;
+  }
+  form.value.goodsList.push(goodsForm.value);
+  addGoodsOpen.value = false;
+}
+function removeGoods(index) {
+  form.value.goodsList.splice(index, 1);
 }
 
 getList();
