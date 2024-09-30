@@ -200,7 +200,8 @@
       <el-form-item label="备注" prop="remarks">
         <el-input v-model="form.remarks" type="textarea" placeholder="请输入内容" />
       </el-form-item>
-      <ImageUpload></ImageUpload>
+
+      <ImageUpload @update:modelValue="handleUpload"></ImageUpload>
       <!-- 下半部分：进货明细表格 -->
       <div class="goods-list">
         <el-button type="primary" @click="handleGoodsAdd" style="margin-bottom: 10px;">新增</el-button>
@@ -439,6 +440,14 @@ function addGoods() {
 }
 function removeGoods(index) {
   form.value.goodsList.splice(index, 1);
+}
+
+function handleUpload(fileList){
+  console.log("父组件打印上传文件------", fileList);
+  if (!fileList || fileList.length == 0) {
+    return;
+  }
+  
 }
 
 getList();
