@@ -16,6 +16,7 @@
       :file-list="fileList"
       :on-preview="handlePictureCardPreview"
       :class="{ hide: fileList.length >= limit }"
+      :data="associationData"
     >
       <el-icon class="avatar-uploader-icon"><plus /></el-icon>
     </el-upload>
@@ -47,6 +48,7 @@
 
 <script setup>
 import { getToken } from "@/utils/auth";
+import request from '@/utils/request';
 
 const props = defineProps({
   modelValue: [String, Object, Array],
@@ -70,6 +72,14 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  //关联数据
+  associationData: {
+    type: Object,
+    default: {
+      associationId: "123",
+      associationType: "456"
+    }
+  }
 });
 
 const { proxy } = getCurrentInstance();
@@ -148,7 +158,8 @@ function handleExceed() {
 // 上传成功回调
 function handleUploadSuccess(res, file) {
   if (res.code === 200) {
-    uploadList.value.push({ name: res.fileName, url: res.fileName });
+    var id = res.newFileName.split('.')[0];
+    uploadList.value.push({ name: res.fileName, url: baseUrl + res.fileName, id: id });
     uploadedSuccessfully();
   } else {
     number.value--;
@@ -160,11 +171,21 @@ function handleUploadSuccess(res, file) {
 }
 
 // 删除图片
-function handleDelete(file) {
+async function  handleDelete(file) {
   const findex = fileList.value.map(f => f.name).indexOf(file.name);
   if (findex > -1 && uploadList.value.length === number.value) {
+    //删除请求
+    var deleteFilePath = [];
+    const filePath = file.name.indexOf(baseUrl) > -1 ? file.name.substring(baseUrl.length) : file.name;
+    deleteFilePath.push(filePath);
+    const response = await request({
+      url: '/common/deleteFiles',
+      method: 'post',
+      data: deleteFilePath
+    });
+    
     fileList.value.splice(findex, 1);
-    emit("update:modelValue", listToString(fileList.value));
+    emit("update:modelValue", uploadList.value);
     return false;
   }
 }
@@ -175,7 +196,7 @@ function uploadedSuccessfully() {
     fileList.value = fileList.value.filter(f => f.url !== undefined).concat(uploadList.value);
     uploadList.value = [];
     number.value = 0;
-    emit("update:modelValue", listToString(fileList.value));
+    emit("update:modelValue", uploadList.value);
     proxy.$modal.closeLoading();
   }
 }

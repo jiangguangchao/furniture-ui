@@ -201,7 +201,7 @@
         <el-input v-model="form.remarks" type="textarea" placeholder="请输入内容" />
       </el-form-item>
 
-      <ImageUpload @update:modelValue="handleUpload"></ImageUpload>
+      <ImageUpload :modelValue="filePathList" :associationData="associationData" @update:modelValue="handleUpload"></ImageUpload>
       <!-- 下半部分：进货明细表格 -->
       <div class="goods-list">
         <el-button type="primary" @click="handleGoodsAdd" style="margin-bottom: 10px;">新增</el-button>
@@ -275,6 +275,8 @@ const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
 const daterangePurchaseDate = ref([]);
+const filePathList = ref([]);
+const associationData = ref({});
 
 const data = reactive({
   form: {},
@@ -334,7 +336,8 @@ function reset() {
     orderList: null,
     totalAmount: null,
     goodsList: [],
-    remarks: null
+    remarks: null,
+    uploadFiles: []
   };
   proxy.resetForm("purchaseOrderRef");
 }
@@ -370,12 +373,26 @@ function handleAdd() {
 function handleUpdate(row) {
   reset();
   const _id = row.id || ids.value
-  getPurchaseOrder(_id).then(response => {
-    form.value = response.data;
-    form.value.goodsList = form.value.goodsList ? JSON.parse(form.value.goodsList) : [];
-    open.value = true;
-    title.value = "修改进货单";
-  });
+  form.value = {...row};
+  form.value.goodsList = form.value.goodsList ? JSON.parse(form.value.goodsList) : [];
+  open.value = true;
+  title.value = "修改进货单";
+  filePathList.value = [];
+  if (form.value.uploadFiles) {
+    form.value.uploadFiles.forEach(item => {
+      filePathList.value.push(item.filePath);
+    });
+  }
+  form.value.uploadFiles = [];//清空数组内容，防止将提交表单时将已保存文件记录再次保存
+  associationData.value.associationId = row.id;
+  associationData.value.associationType = 'PO';
+
+  // getPurchaseOrder(_id).then(response => {
+  //   form.value = response.data;
+  //   form.value.goodsList = form.value.goodsList ? JSON.parse(form.value.goodsList) : [];
+  //   open.value = true;
+  //   title.value = "修改进货单";
+  // });
 }
 
 /** 提交按钮 */
@@ -386,6 +403,9 @@ function submitForm() {
       form.value.goodsList = JSON.stringify(form.value.goodsList);
 
       if (form.value.id != null) {
+        //修改提交时不需要传uploadFiles，因为文件上传时已经绑定到了当前记录。
+        //如果这里不清空，会导致当前记录关联的文件上传记录重复
+        form.value.uploadFiles = [];
         updatePurchaseOrder(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
@@ -443,11 +463,29 @@ function removeGoods(index) {
 }
 
 function handleUpload(fileList){
-  console.log("父组件打印上传文件------", fileList);
   if (!fileList || fileList.length == 0) {
     return;
   }
+
+  if (!form.value.uploadFiles) {
+    form.value.uploadFiles = [];
+  }
+  fileList.forEach(file => {
+    if (file) {
+      form.value.uploadFiles.push({id:file.id});
+    }
+  });
   
+}
+
+function getFileId(path) {
+  // 找到最后一个斜杠的位置
+  const lastSlashIndex = path.lastIndexOf('/');
+  // 提取从最后一个斜杠之后的部分
+  const fileNameWithExtension = path.substring(lastSlashIndex + 1);
+  // 去除后缀名
+  const fileNameWithoutExtension = fileNameWithExtension.split('.')[0];
+  return fileNameWithoutExtension;
 }
 
 getList();
