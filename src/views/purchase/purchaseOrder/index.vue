@@ -340,6 +340,8 @@ function reset() {
     uploadFiles: []
   };
   proxy.resetForm("purchaseOrderRef");
+  associationData.value.associationId = '';
+  associationData.value.associationType = 'PO';
 }
 
 /** 搜索按钮操作 */
