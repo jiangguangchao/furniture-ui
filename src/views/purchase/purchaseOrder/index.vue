@@ -89,8 +89,9 @@
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['purchase:purchaseOrder:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['purchase:purchaseOrder:remove']">删除</el-button>
+          <!-- <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['purchase:purchaseOrder:edit']">修改</el-button> -->
+          <!-- <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['purchase:purchaseOrder:remove']">删除</el-button> -->
+          <el-button link type="primary" icon="Delete" @click="handleDetail(scope.row)" v-hasPermi="['purchase:purchaseOrder:list']">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -157,13 +158,13 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="日期" prop="purchaseDate">
+          <el-form-item label="订货时间" prop="purchaseDate">
             <el-date-picker clearable
               v-model="form.purchaseDate"
               type="datetime"
               format="YYYY-MM-DD HH:mm:ss"
               value-format="YYYY-MM-DD HH:mm:ss"
-              placeholder="请选择日期">
+              placeholder="请选择订货时间">
             </el-date-picker>
           </el-form-item>
         </el-col>
@@ -255,11 +256,16 @@
     </template>
   </el-dialog>
 
+  <el-dialog title="详情" v-model="detailOpen" width="700px" append-to-body>
+    <detailTab :purchaseOrder="currentPurchaseOrder"></detailTab>
+  </el-dialog>
+
   </div>
 </template>
 
 <script setup name="PurchaseOrder">
 import { listPurchaseOrder, getPurchaseOrder, delPurchaseOrder, addPurchaseOrder, updatePurchaseOrder } from "@/api/purchase/purchaseOrder";
+import detailTab from "./detailTab.vue"
 import { parseTime } from "@/utils/ruoyi";
 
 const { proxy } = getCurrentInstance();
@@ -277,6 +283,8 @@ const title = ref("");
 const daterangePurchaseDate = ref([]);
 const filePathList = ref([]);
 const associationData = ref({});
+const currentPurchaseOrder = ref({});
+const detailOpen = ref(false);
 
 const data = reactive({
   form: {},
@@ -422,6 +430,11 @@ function submitForm() {
       }
     }
   });
+}
+
+function handleDetail(row) {
+  currentPurchaseOrder.value = row;
+  detailOpen.value = true;
 }
 
 /** 删除按钮操作 */

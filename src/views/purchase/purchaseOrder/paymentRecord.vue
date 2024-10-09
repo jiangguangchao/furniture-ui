@@ -7,7 +7,6 @@
           plain
           icon="Plus"
           @click="handleAdd"
-          v-hasPermi="['order:paymentRecord:add']"
         >新增</el-button>
       </el-col>
     </el-row>
@@ -87,7 +86,7 @@ import { eventBus } from "@/utils/eventBus";
 
 // 接收 props
 const props = defineProps({
-  order: {
+  purchaseOrder: {
     type: Object,
     required: true,
   },
@@ -112,7 +111,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 1000,
     orderId: null,
-    associationType: 'FO'
+    associationType: 'PO'
   },
   rules: {
     orderId: [
@@ -132,7 +131,7 @@ const { queryParams, form, rules } = toRefs(data);
 /** 查询支付记录列表 */
 function getList() {
   loading.value = true;
-  queryParams.value.orderId = props.order.id;
+  queryParams.value.orderId = props.purchaseOrder.id;
   listPaymentRecord(queryParams.value).then(response => {
     paymentRecordList.value = response.rows;
     total.value = response.total;
@@ -155,7 +154,7 @@ function reset() {
     paymentMethod: null,
     paymentAmount: null,
     remark: null,
-    associationType: 'FO'
+    associationType: 'PO'
   };
   proxy.resetForm("paymentRecordRef");
 }
@@ -209,7 +208,7 @@ function submitForm() {
           eventBus.emit("orderUpdated");
         });
       } else {
-        form.value.orderId = props.order.id;
+        form.value.orderId = props.purchaseOrder.id;
         addPaymentRecord(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
