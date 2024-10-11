@@ -76,8 +76,8 @@ const props = defineProps({
   associationData: {
     type: Object,
     default: {
-      associationId: "123",
-      associationType: "456"
+      associationId: "",
+      associationType: ""
     }
   }
 });

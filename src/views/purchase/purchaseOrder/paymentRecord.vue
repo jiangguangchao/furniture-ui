@@ -205,7 +205,6 @@ function submitForm() {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
           getList();
-          eventBus.emit("orderUpdated");
         });
       } else {
         form.value.orderId = props.purchaseOrder.id;
@@ -213,7 +212,7 @@ function submitForm() {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
-          eventBus.emit("orderUpdated");
+          eventBus.emit("purchaseOrderupdated");
         });
       }
     }
@@ -224,11 +223,11 @@ function submitForm() {
 function handleDelete(row) {
   const _ids = row.id || ids.value;
   proxy.$modal.confirm('是否确认删除支付记录编号为"' + _ids + '"的数据项？').then(function() {
-    return delPaymentRecord(_ids);
+    return delPaymentRecord(row);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
-    eventBus.emit("orderUpdated");
+    eventBus.emit("purchaseOrderupdated");
   }).catch(() => {});
 }
 
