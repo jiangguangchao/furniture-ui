@@ -551,11 +551,11 @@ function handleExport() {
 }
 
 onMounted(() => {
-  eventBus.on('orderUpdated', getList);
+  eventBus.on('FO:orderupdated', getList);
 });
 
 onUnmounted(() => {
-  eventBus.off('orderUpdated', getList);
+  eventBus.off('FO:orderupdated', getList);
 });
 
 getList();

@@ -2,26 +2,31 @@
   <div class="app-container">
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="Plus"
-          @click="handleAdd"
-        >新增</el-button>
+        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
       </el-col>
     </el-row>
 
     <el-table v-loading="loading" :data="paymentRecordList" @selection-change="handleSelectionChange" border>
       <el-table-column type="expand">
-        <template #default="props">
-          <div m="4">
-            <p m="t-0 b-2">支付记录编号: {{ props.row.id }}</p>
-            <p m="t-0 b-2">订单编号: {{ props.row.orderId }}</p>
-            <p m="t-0 b-2">创建者: {{ props.row.createBy }}</p>
-            <p m="t-0 b-2">创建时间: {{ parseTime(props.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</p>
-            <p m="t-0 b-2">更新者: {{ props.row.updateBy }}</p>
-            <p m="t-0 b-2">更新时间: {{ parseTime(props.row.updateTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</p>
-          </div>
+        <template #default="scope">
+          <el-card class="box-card">
+            <div style="display: flex; justify-content: space-between;">
+              <div>
+                <span>支付记录编号: {{ scope.row.id }}</span><br>
+                <span>创建者: {{ scope.row.createBy }}</span><br>
+                <span>更新者: {{ scope.row.updateBy }}</span><br>
+              </div>
+              <div>
+                <span>订单编号: {{ scope.row.orderId }}</span><br>
+                <span>创建时间: {{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span><br>
+                <span>更新时间: {{ parseTime(scope.row.updateTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span><br>
+              </div>
+            </div>
+          </el-card>
+          <el-card class="box-card">
+            <ImageUpload :modelValue="scope.row.uploadFiles.map(item => item.filePath)" 
+              :associationData="{ associationId: scope.row.id, associationType: 'PR' }"/>
+          </el-card>
         </template>
       </el-table-column>
       <el-table-column label="支付时间" align="center" prop="paymentTime" width="180">
@@ -38,22 +43,20 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['order:paymentRecord:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['order:paymentRecord:remove']">删除</el-button>
+          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
+            v-hasPermi="['order:paymentRecord:edit']">修改</el-button>
+          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['order:paymentRecord:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <!-- 添加或修改支付记录对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="paymentRecordRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="支付时间" prop="paymentTime">
-          <el-date-picker clearable
-            v-model="form.paymentTime"
-            type="datetime"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="请选择支付时间">
+          <el-date-picker clearable v-model="form.paymentTime" type="datetime" format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss" placeholder="请选择支付时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="支付金额" prop="paymentAmount">
@@ -61,10 +64,11 @@
         </el-form-item>
         <el-form-item label="支付方式" prop="paymentMethod">
           <el-select v-model="form.paymentMethod" placeholder="请选择支付方式">
-            <el-option v-for="dict in payment_method" :key="dict.value" :label="dict.label" :value="dict.value"></el-option>
+            <el-option v-for="dict in payment_method" :key="dict.value" :label="dict.label"
+              :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
@@ -83,13 +87,18 @@
 import { listPaymentRecord, getPaymentRecord, delPaymentRecord, addPaymentRecord, updatePaymentRecord } from "@/api/order/paymentRecord";
 import { parseTime } from "@/utils/ruoyi";
 import { eventBus } from "@/utils/eventBus";
+import { ref } from "vue";
 
 // 接收 props
 const props = defineProps({
-  purchaseOrder: {
+  order: {
     type: Object,
     required: true,
   },
+  associationType: {
+    type: String,
+    default: ""
+  }
 });
 
 const { proxy } = getCurrentInstance();
@@ -104,6 +113,7 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
+const fileUrlList = ref([]);
 
 const data = reactive({
   form: {},
@@ -111,7 +121,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 1000,
     orderId: null,
-    associationType: 'PO'
+    associationType: props.associationType,
   },
   rules: {
     orderId: [
@@ -131,7 +141,7 @@ const { queryParams, form, rules } = toRefs(data);
 /** 查询支付记录列表 */
 function getList() {
   loading.value = true;
-  queryParams.value.orderId = props.purchaseOrder.id;
+  queryParams.value.orderId = props.order.id;
   listPaymentRecord(queryParams.value).then(response => {
     paymentRecordList.value = response.rows;
     total.value = response.total;
@@ -150,11 +160,11 @@ function reset() {
   form.value = {
     id: null,
     orderId: null,
-    paymentTime:  parseTime(new Date()),
+    paymentTime: parseTime(new Date()),
     paymentMethod: null,
     paymentAmount: null,
     remark: null,
-    associationType: 'PO'
+    associationType: props.associationType
   };
   proxy.resetForm("paymentRecordRef");
 }
@@ -207,12 +217,12 @@ function submitForm() {
           getList();
         });
       } else {
-        form.value.orderId = props.purchaseOrder.id;
+        form.value.orderId = props.order.id;
         addPaymentRecord(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
-          eventBus.emit("purchaseOrderupdated");
+          eventBus.emit(props.associationType + ":orderupdated");
         });
       }
     }
@@ -222,13 +232,13 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除支付记录编号为"' + _ids + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除支付记录编号为"' + _ids + '"的数据项？').then(function () {
     return delPaymentRecord(row);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
-    eventBus.emit("purchaseOrderupdated");
-  }).catch(() => {});
+    eventBus.emit(props.associationType + ":orderupdated");
+  }).catch(() => { });
 }
 
 /** 导出按钮操作 */
@@ -240,3 +250,9 @@ function handleExport() {
 
 getList();
 </script>
+
+<style scoped>
+.box-card {
+  border: 2px solid #637a71;
+}
+</style>

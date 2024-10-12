@@ -71,6 +71,8 @@ const props = defineProps({
   },
 });
 
+const associationType = 'PO';
+
 
 const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));//取平舆县的乡镇
 const villageArr = computed(() =>
@@ -123,7 +125,7 @@ function reset() {
   };
   proxy.resetForm("purchaseOrderRef");
   associationData.value.associationId = '';
-  associationData.value.associationType = 'PO';
+  associationData.value.associationType = associationType;
 }
 
 
@@ -140,12 +142,12 @@ function submitForm() {
         form.value.uploadFiles = [];
         updatePurchaseOrder(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
-          eventBus.emit("purchaseOrderupdated");
+          eventBus.emit(associationType + ":orderupdated");
         });
       } else {
         addPurchaseOrder(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
-          eventBus.emit("purchaseOrderupdated");
+          eventBus.emit(associationType + ":orderupdated");
         });
       }
     }

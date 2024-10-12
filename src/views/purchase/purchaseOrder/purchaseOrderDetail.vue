@@ -227,11 +227,11 @@ function purchaseOrderupdated(){
 }
 
 onMounted(() => {
-  eventBus.on('purchaseOrderupdated', purchaseOrderupdated);
+  eventBus.on('PO:orderupdated', purchaseOrderupdated);
 });
 
 onUnmounted(() => {
-  eventBus.off('purchaseOrderupdated', purchaseOrderupdated);
+  eventBus.on('PO:orderupdated', purchaseOrderupdated);
 });
 
 </script>

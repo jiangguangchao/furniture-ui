@@ -313,11 +313,11 @@ function getFileId(path) {
 }
 
 onMounted(() => {
-  eventBus.on('purchaseOrderupdated', getList);
+  eventBus.on('PO:orderupdated', getList);
 });
 
 onUnmounted(() => {
-  eventBus.off('purchaseOrderupdated', getList);
+  eventBus.off('PO:orderupdated', getList);
 });
 
 getList();

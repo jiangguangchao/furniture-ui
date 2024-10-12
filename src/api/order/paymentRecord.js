@@ -39,7 +39,7 @@ export function updatePaymentRecord(data) {
 export function delPaymentRecord(record) {
   return request({
     url: '/order/paymentRecord/delete',
-    method: 'delete',
+    method: 'post',
     data: record
   })
 }

@@ -118,11 +118,11 @@ function getById() {
 
 
 onMounted(() => {
-  eventBus.on('orderUpdated', getById);
+  eventBus.on('FO:orderupdated', getById);
 });
 
 onUnmounted(() => {
-  eventBus.off('orderUpdated', getById);
+  eventBus.off('FO:orderupdated', getById);
 });
 
 </script>
