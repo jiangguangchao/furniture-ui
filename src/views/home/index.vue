@@ -26,12 +26,7 @@
               <span>最近一周订单统计</span>
             </div>
           </template>
-          <div class="text item">
-            总订单数: {{ recentOrderStats.total }}
-          </div>
-          <div class="text item">
-            平均每天订单数: {{ recentOrderStats.average }}
-          </div>
+          <furnitureOrderStatc />
         </el-card>
       </el-col>
     </el-row>
@@ -41,6 +36,7 @@
 <script setup>
 import { ref } from 'vue';
 import orderList from './orderList.vue'
+import furnitureOrderStatc from './furnitureOrderStatc.vue'
 
 // 模拟数据
 const incompleteOrders = ref([
@@ -67,7 +63,7 @@ const recentOrderStats = ref({
 }
 
 .box-card {
-  height: 300px;
+  height: 500px;
   border: 2px solid #637a71;
 }
 
