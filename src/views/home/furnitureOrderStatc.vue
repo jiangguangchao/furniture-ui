@@ -11,6 +11,10 @@ const queryParams = ref(
   {
     dateType: null,
     dataType: null,
+    params: {
+      startDate: '',
+      endDate: '',
+    },
   }
 );
 const chart = ref(null);
@@ -95,9 +99,12 @@ function calculateRelativeDate(offset) {
 
   return `${year}-${month}-${day}`;
 }
-</script>
 
 getList();
+
+</script>
+
+
 
 <style scoped>
 /* #chart {
