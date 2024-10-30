@@ -245,8 +245,13 @@
       @pagination="getList"
     />
 
+
+    <el-dialog title="新增订单" v-model="open" width="500px" append-to-body>
+    <orderEdit />
+  </el-dialog>
+
     <!-- 添加或修改家具订单对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
+    <!-- <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form
         ref="furnitureOrderRef"
         :model="form"
@@ -335,7 +340,7 @@
           <el-button @click="cancel">取 消</el-button>
         </div>
       </template>
-    </el-dialog>
+    </el-dialog> -->
 
     <!-- 订单详情 -->
     <el-dialog :title="detailTitle" v-model="detailOpen" width="800px" append-to-body>
@@ -359,6 +364,7 @@ import {
 import detailTab from "./detailTab.vue"
 import useDistrictsStore from "@/store/modules/districts";
 import { eventBus } from "@/utils/eventBus";
+import orderEdit from "./orderEdit";
 
 const districtsStore = useDistrictsStore();
 

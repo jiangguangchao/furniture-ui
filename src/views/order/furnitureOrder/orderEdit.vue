@@ -62,20 +62,45 @@ import {
 import useDistrictsStore from "@/store/modules/districts";
 // import { eventBus } from "../../../utils/eventBus";
 import { eventBus } from "@/utils/eventBus";
+import { parseTime } from "element-plus/es/components/time-select/src/utils.mjs";
 const districtsStore = useDistrictsStore();
 const { proxy } = getCurrentInstance();
+const { order_status } = proxy.useDict("order_status");
 
 // 接收 props
 const props = defineProps({
     order: {
         type: Object,
-        required: true,
+        required: false,
     },
 });
 
+const mytime = parseTime();
+
 
 // 使用 toRefs 将 reactive 对象转换为普通对象
-const copyOrder = toRefs(reactive({ ...props.order }));
+let copyOrder = null;
+if (props.order) {
+    //父组件传入了order对象，说明是修改
+    copyOrder = toRefs(reactive({ ...props.order }));
+} else {
+    //父组件没有传入order对象，说明是新增
+    copyOrder = toRefs(reactive({
+        id: null,
+        totalMoney: 0,
+        paidMoney: 0,
+        orderStatus: "1",
+        orderTime: parseTime(),
+        orderUser: null,
+        phoneNumber: null,
+        district: '411723',
+        town: "411723103",
+        village: null,
+        dui: null,
+        subVillage: null,
+        remark: null,
+    }));
+}
 
 const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));//取平舆县的乡镇
 const villageArr = computed(() =>
@@ -118,7 +143,7 @@ function cancel() {
 function reset() {
     form.value = {
         id: null,
-        totalMoney: null,
+        totalMoney: 0,
         paidMoney: null,
         orderStatus: "1",
         orderTime: null,

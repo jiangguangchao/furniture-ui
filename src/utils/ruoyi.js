@@ -8,7 +8,7 @@
 // 日期格式化
 export function parseTime(time, pattern) {
   if (arguments.length === 0 || !time) {
-    return null
+    time = new Date()
   }
   const format = pattern || '{y}-{m}-{d} {h}:{i}:{s}'
   let date
