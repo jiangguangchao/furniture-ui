@@ -106,7 +106,7 @@
 
     <!--新增-->
     <el-dialog :title="title" :inline="true" v-model="open" width="700px" append-to-body>
-      <purchaseOrderEdit :purchaseOrder="currentPurchaseOrder" />
+      <purchaseOrderEdit />
     </el-dialog>
 
   

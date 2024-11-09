@@ -57,32 +57,27 @@
 </template>
 
 <script setup>
-import useDistrictsStore from "@/store/modules/districts";
 import { eventBus } from "@/utils/eventBus";
 import { listPurchaseOrder, getPurchaseOrder, delPurchaseOrder, addPurchaseOrder, updatePurchaseOrder } from "@/api/purchase/purchaseOrder";
-const districtsStore = useDistrictsStore();
 const { proxy } = getCurrentInstance();
+const { purchase_arrival_status } = proxy.useDict('purchase_arrival_status');
 
 // 接收 props
 const props = defineProps({
   purchaseOrder: {
     type: Object,
-    required: true,
+    required: false,
   },
 });
 
 const associationType = 'PO';
 
 
-const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));//取平舆县的乡镇
-const villageArr = computed(() =>
-  districtsStore.getDistrictsByPCode("411723103")
-);
-
-console.log("这是编辑页面")
-
 const data = reactive({
-  form: {...props.purchaseOrder},
+  //判断props.purchaseOrder是否为空，然后赋值form
+  form: { ...props.purchaseOrder },
+
+  // form: {...props.purchaseOrder},
   queryParams: {
     pageNum: 1,
     pageSize: 10,
@@ -104,16 +99,21 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data);
 
-function cancel() {
-  console.log("cancel...........");
+
+if (!props.purchaseOrder) {
+  // 重置表单
+  console.log("重置表单")
+  reset();
 }
+
+console.log("form:", form.value)
 
 // 表单重置
 function reset() {
   form.value = {
     id: null,
     supplier: null,
-    purchaseDate: parseTime(new Date()),
+    purchaseDate: null,
     arrivalStatus: '0',
     phone: null,
     weichat: null,
@@ -124,8 +124,8 @@ function reset() {
     uploadFiles: []
   };
   proxy.resetForm("purchaseOrderRef");
-  associationData.value.associationId = '';
-  associationData.value.associationType = associationType;
+  // associationData.value.associationId = '';
+  // associationData.value.associationType = associationType;
 }
 
 
@@ -153,6 +153,10 @@ function submitForm() {
     }
   });
 }
+
+// function getDefaultTime() {
+//   return parseTime(new Date())
+// }
 
 
 
