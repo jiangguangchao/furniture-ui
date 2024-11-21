@@ -134,7 +134,7 @@ function submitForm() {
   proxy.$refs["purchaseOrderRef"].validate(valid => {
     if (valid) {
 
-      // form.value.goodsList = JSON.stringify(form.value.goodsList);
+      form.value.goodsList = JSON.stringify(form.value.goodsList);
 
       if (form.value.id != null) {
         //修改提交时不需要传uploadFiles，因为文件上传时已经绑定到了当前记录。

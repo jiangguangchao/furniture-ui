@@ -101,6 +101,11 @@ const props = defineProps({
   }
 });
 
+watch(() => props.order, () => {
+  console.log("查询订单支付记录", props.order);
+  getList();
+});
+
 const { proxy } = getCurrentInstance();
 const { payment_method } = proxy.useDict("payment_method");
 

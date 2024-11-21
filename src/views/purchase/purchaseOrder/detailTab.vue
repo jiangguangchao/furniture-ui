@@ -22,4 +22,13 @@ const props = defineProps({
     required: true,
   },
 });
+
+// var newPurchaseOrder = props.purchaseOrder
+
+// watch(() => props.purchaseOrder, () => {
+//   console.log("watch purchaseOrder", props.purchaseOrder)
+//   newPurchaseOrder = props.purchaseOrder
+// });
+
+console.log("详情页收到的进货单", props.purchaseOrder)
 </script>

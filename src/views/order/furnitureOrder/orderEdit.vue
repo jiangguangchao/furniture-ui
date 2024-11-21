@@ -40,6 +40,12 @@
             <el-form-item label="村庄" prop="subVillage">
                 <el-input v-model="form.subVillage" placeholder="请输入村庄" />
             </el-form-item>
+            <el-form-item label="是否包含定制" prop="includeCustom">
+                <el-radio-group v-model="form.includeCustom">
+                    <el-radio label="Y">是</el-radio>
+                    <el-radio label="N">否</el-radio>
+                </el-radio-group>
+            </el-form-item>
             <el-form-item label="备注" prop="remark">
                 <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
             </el-form-item>
@@ -99,6 +105,7 @@ if (props.order) {
         dui: null,
         subVillage: null,
         remark: null,
+        includeCustom: 'N'
     }));
 }
 
@@ -120,6 +127,7 @@ const data = reactive({
         phoneNumber: null,
         town: "411723103",
         village: null,
+        includeCustom: 'N'
     },
     rules: {
         orderStatus: [
@@ -155,6 +163,7 @@ function reset() {
         dui: null,
         subVillage: null,
         remark: null,
+        includeCustom: 'N'
     };
     proxy.resetForm("furnitureOrderRef");
 }

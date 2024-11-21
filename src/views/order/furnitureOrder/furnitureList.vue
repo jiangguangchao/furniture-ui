@@ -101,6 +101,7 @@ import {
   updateOrderFurniture,
 } from "@/api/order/orderFurniture";
 import { eventBus } from "@/utils/eventBus";
+import { watch } from "vue";
 
 // 接收 props
 const props = defineProps({
@@ -108,6 +109,11 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+});
+
+watch(() => props.order, () => {
+  console.log("查询订单中家具列表", props.order);
+  getList();
 });
 
 const { proxy } = getCurrentInstance();

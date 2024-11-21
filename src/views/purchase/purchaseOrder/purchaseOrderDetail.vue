@@ -150,6 +150,11 @@ const props = defineProps({
   },
 });
 
+watch(() => props.purchaseOrder, () => {
+  console.log("watch purchaseOrder", props.purchaseOrder);
+  assignNewObj(props.purchaseOrder);
+});
+
 var copyOrder = reactive({});
 const associationData = reactive({
   associationId: props.purchaseOrder.id,

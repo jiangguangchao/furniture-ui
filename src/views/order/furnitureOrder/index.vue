@@ -250,97 +250,7 @@
     <orderEdit />
   </el-dialog>
 
-    <!-- 添加或修改家具订单对话框 -->
-    <!-- <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form
-        ref="furnitureOrderRef"
-        :model="form"
-        :rules="rules"
-        label-width="80px"
-      >
-        <el-form-item label="总金额" prop="totalMoney" >
-          <el-input v-model="form.totalMoney" placeholder="请输入总金额" disabled/>
-        </el-form-item>
-        <el-form-item label="已支付金额" prop="paidMoney" >
-          <el-input v-model="form.paidMoney" placeholder="请输入已支付金额" disabled/>
-        </el-form-item>
-        <el-form-item label="订单状态" prop="orderStatus">
-          <el-select v-model="form.orderStatus" placeholder="请选择订单状态">
-            <el-option
-              v-for="dict in order_status"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="下单时间" prop="orderTime">
-          <el-date-picker
-            clearable
-            v-model="form.orderTime"
-            type="datetime"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="请选择下单时间"
-            :default-time="defaultTime"
-          >
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="下单人" prop="orderUser">
-          <el-input v-model="form.orderUser" placeholder="请输入下单人" />
-        </el-form-item>
-        <el-form-item label="联系电话" prop="phoneNumber">
-          <el-input v-model="form.phoneNumber" placeholder="请输入联系电话" />
-        </el-form-item>
-        <el-form-item label="乡镇" prop="town" style="width: 200px">
-          <el-select
-            v-model="form.town"
-            placeholder="请选择乡镇"
-            clearable
-          >
-            <el-option
-              v-for="t in townArr"
-              :key="t.code"
-              :label="t.name"
-              :value="t.code"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="村委" prop="village" style="width: 200px">
-          <el-select
-            v-model="form.village"
-            placeholder="请选择村委"
-            clearable
-          >
-            <el-option
-              v-for="t in villageArr"
-              :key="t.code"
-              :label="t.name"
-              :value="t.code"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="几队" prop="dui">
-          <el-input v-model="form.dui" placeholder="请输入几队" />
-        </el-form-item>
-        <el-form-item label="村庄" prop="subVillage">
-          <el-input v-model="form.subVillage" placeholder="请输入村庄" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input
-            v-model="form.remark"
-            type="textarea"
-            placeholder="请输入内容"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitForm">确 定</el-button>
-          <el-button @click="cancel">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog> -->
+    
 
     <!-- 订单详情 -->
     <el-dialog :title="detailTitle" v-model="detailOpen" width="800px" append-to-body>
@@ -461,6 +371,7 @@ function reset() {
     dui: null,
     subVillage: null,
     remark: null,
+    includeCustom: 'N'
   };
   proxy.resetForm("furnitureOrderRef");
 }

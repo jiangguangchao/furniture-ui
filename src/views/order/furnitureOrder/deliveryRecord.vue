@@ -112,6 +112,10 @@ const props = defineProps({
   },
 });
 
+watch(() => props.order, () => {
+  getList();
+});
+
 const { proxy } = getCurrentInstance();
 const { record_delivery_status } = proxy.useDict('record_delivery_status');
 

@@ -261,7 +261,7 @@ function submitForm() {
 }
 
 function handleDetail(row) {
-  console.log("handleDetail row: ", row.goodsList);
+  console.log("handleDetail row: ", row);
   currentPurchaseOrder.value = row;
   detailOpen.value = true;
 }

@@ -84,6 +84,7 @@
 import { listPaymentRecord, getPaymentRecord, delPaymentRecord, addPaymentRecord, updatePaymentRecord } from "@/api/order/paymentRecord";
 import { parseTime } from "@/utils/ruoyi";
 import { eventBus } from "@/utils/eventBus";
+import { watch } from "vue";
 
 // 接收 props
 const props = defineProps({
@@ -91,6 +92,11 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+});
+
+watch(() => props.order, () => {
+  console.log("查询订单支付记录", props.order);
+  getList();
 });
 
 const { proxy } = getCurrentInstance();
@@ -131,10 +137,12 @@ const { queryParams, form, rules } = toRefs(data);
 
 /** 查询支付记录列表 */
 function getList() {
+  console.log("查询支付记录列表");
   loading.value = true;
   queryParams.value.orderId = props.order.id;
   listPaymentRecord(queryParams.value).then(response => {
     paymentRecordList.value = response.rows;
+    console.log("查询支付记录", paymentRecordList.value)
     total.value = response.total;
     loading.value = false;
   });

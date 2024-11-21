@@ -99,11 +99,21 @@ const props = defineProps({
     required: true,
   },
 });
-const localOrder = ref({ ...props.order });
+var localOrder = reactive({});
+
+watch(() => props.order, () => {
+  // console.log("watch order", props.order);
+  assignNewObj(props.order)
+});
+assignNewObj(props.order)
 
 /** 修改按钮操作 */
 function handleUpdate() {
   open.value = true;
+}
+
+function assignNewObj(newObj) {
+  Object.assign(localOrder, newObj);
 }
 
 function getById() {
