@@ -43,6 +43,18 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="物流" prop="logistics">
+            <el-input v-model="form.logistics" placeholder="请输入物流名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="物流费" prop="logisticsMoney">
+            <el-input v-model="form.logisticsMoney" placeholder="请输入物流费" />
+          </el-form-item>
+        </el-col>
+      </el-row>
       <el-form-item label="备注" prop="remarks">
         <el-input v-model="form.remarks" type="textarea" placeholder="请输入内容" />
       </el-form-item>
@@ -121,7 +133,10 @@ function reset() {
     totalAmount: null,
     goodsList: [],
     remarks: null,
-    uploadFiles: []
+    uploadFiles: [],
+    logistics: null, 
+    logisticsMoney: null
+
   };
   proxy.resetForm("purchaseOrderRef");
   // associationData.value.associationId = '';

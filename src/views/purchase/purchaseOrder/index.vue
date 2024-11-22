@@ -82,6 +82,8 @@
           <dict-tag :options="purchase_arrival_status" :value="scope.row.arrivalStatus"/>
         </template>
       </el-table-column>
+      <el-table-column label="物流" align="center" prop="logistics" />
+      <el-table-column label="物流费" align="center" prop="logisticsMoney" />
       <el-table-column label="手机" align="center" prop="phone" />
       <el-table-column label="微信" align="center" prop="weichat" />
       <el-table-column label="已支付金额" align="center" prop="paidMoney" />

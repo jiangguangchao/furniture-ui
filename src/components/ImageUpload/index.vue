@@ -10,7 +10,7 @@
       :on-error="handleUploadError"
       :on-exceed="handleExceed"
       ref="imageUpload"
-      :before-remove="handleDelete"
+      :before-remove="beforeDel"
       :show-file-list="true"
       :headers="headers"
       :file-list="fileList"
@@ -169,6 +169,14 @@ function handleUploadSuccess(res, file) {
     uploadedSuccessfully();
   }
 }
+
+function beforeDel(file) {
+  proxy.$modal.confirm('确认删除图片？').then(function() {
+    return handleDelete(file);
+  })
+  return false;
+}
+
 
 // 删除图片
 async function  handleDelete(file) {
