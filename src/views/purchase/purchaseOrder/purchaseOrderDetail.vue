@@ -64,7 +64,7 @@
     </template>
     <div class="goods-list">
       <el-button type="primary" @click="handleGoodsAdd" style="margin-bottom: 10px;">新增</el-button>
-      <el-table :data="copyOrder.goodsList" style="width: 100%">
+      <el-table :data="goodsList" style="width: 100%">
         <el-table-column prop="name" label="名称">
         </el-table-column>
         <el-table-column prop="unitPrice" label="单价">
@@ -140,6 +140,7 @@ const goodsForm = ref({});
 const addGoodsOpen = ref(false);
 const updateOpen = ref(false);
 const fileUrlList = ref([]);
+const goodsList = ref([]);
 
 
 // 接收 props
@@ -150,16 +151,18 @@ const props = defineProps({
   },
 });
 
-watch(() => props.purchaseOrder, () => {
-  console.log("watch purchaseOrder", props.purchaseOrder);
-  assignNewObj(props.purchaseOrder);
-});
-
-var copyOrder = reactive({});
 const associationData = reactive({
   associationId: props.purchaseOrder.id,
   associationType: "PO",
 });
+
+watch(() => props.purchaseOrder, () => {
+  console.log("watch purchaseOrder", props.purchaseOrder);
+  assignNewObj(props.purchaseOrder);
+  associationData.associationId = props.purchaseOrder.id;
+});
+
+var copyOrder = reactive({});
 // console.log("copyOrder ", copyOrder);
 // console.log("props.purchaseOrder ", props.purchaseOrder);
 
@@ -168,8 +171,10 @@ const associationData = reactive({
 
 assignNewObj(props.purchaseOrder);
 function assignNewObj(newObj) {
+  console.log("goodsList ", copyOrder.goodsList);
   Object.assign(copyOrder, newObj);
-  copyOrder.goodsList = copyOrder.goodsList ? JSON.parse(copyOrder.goodsList) : [];
+  console.log("goodsList ", copyOrder.goodsList);
+  goodsList.value = copyOrder.goodsList ? JSON.parse(copyOrder.goodsList) : [];
   fileUrlList.value = copyOrder.uploadFiles ? copyOrder.uploadFiles.map(item => item.filePath) : [];
 }
 
@@ -199,9 +204,10 @@ function submitGoods() {
     return;
   }
 
-  console.log("copyOrder.goodsList push", copyOrder.goodsList instanceof Array);
-  copyOrder.goodsList.push({name:goodsForm.value.name, unitPrice:goodsForm.value.unitPrice, quantity:goodsForm.value.quantity});
-  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': JSON.stringify(copyOrder.goodsList)}).then(response => {
+  console.log("goodsList.value push", goodsList.value instanceof Array);
+  console.log("goodsList.value", goodsList.value);
+  goodsList.value.push({name:goodsForm.value.name, unitPrice:goodsForm.value.unitPrice, quantity:goodsForm.value.quantity});
+  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': JSON.stringify(goodsList.value)}).then(response => {
     proxy.$modal.msgSuccess("新增成功");
     addGoodsOpen.value = false;
     getById();
@@ -209,8 +215,8 @@ function submitGoods() {
 
 }
 function removeGoods(index) {
-  copyOrder.goodsList.splice(index, 1);
-  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': JSON.stringify(copyOrder.goodsList)}).then(response => {
+  goodsList.value.splice(index, 1);
+  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': JSON.stringify(goodsList.value)}).then(response => {
     proxy.$modal.msgSuccess("删除成功");
     addGoodsOpen.value = false;
     getById();
