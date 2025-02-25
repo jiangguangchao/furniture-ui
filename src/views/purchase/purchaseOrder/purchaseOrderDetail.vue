@@ -163,19 +163,29 @@ watch(() => props.purchaseOrder, () => {
 });
 
 var copyOrder = reactive({});
-// console.log("copyOrder ", copyOrder);
-// console.log("props.purchaseOrder ", props.purchaseOrder);
 
-// copyOrder.goodsList = copyOrder.goodsList ? JSON.parse(copyOrder.goodsList) : [];
-// console.log("copyOrder.goodsList ", copyOrder.goodsList instanceof Array);
+// 自定义的 assign 函数，忽略指定属性
+function customAssign(target, source, ignoreKeys) {
+
+  if (!ignoreKeys) {
+    Object.assign(target, source);
+    return;
+  }
+  Object.keys(source).forEach(key => {
+    if (!ignoreKeys.includes(key)) {
+      target[key] = source[key];
+    }
+  });
+}
 
 assignNewObj(props.purchaseOrder);
-function assignNewObj(newObj) {
-  console.log("goodsList ", copyOrder.goodsList);
-  Object.assign(copyOrder, newObj);
-  console.log("goodsList ", copyOrder.goodsList);
-  goodsList.value = copyOrder.goodsList ? JSON.parse(copyOrder.goodsList) : [];
+function assignNewObj(newObj, ignoreKeys) {
+  customAssign(copyOrder, newObj, ignoreKeys); // 根据实际情况替换 ignoreKey1, ignoreKey2
+  goodsList.value = copyOrder.goodsList ? parseGoodsList(copyOrder.goodsList) : [];
+  console.log("goodsList ", goodsList.value);
   fileUrlList.value = copyOrder.uploadFiles ? copyOrder.uploadFiles.map(item => item.filePath) : [];
+  console.log("assignNewObj方法中打印 fileUrlList ", fileUrlList.value);
+  console.log("assignNewObj方法中打印 copyOrder", copyOrder)
 }
 
 function handleGoodsAdd() {
@@ -204,10 +214,9 @@ function submitGoods() {
     return;
   }
 
-  console.log("goodsList.value push", goodsList.value instanceof Array);
   console.log("goodsList.value", goodsList.value);
   goodsList.value.push({name:goodsForm.value.name, unitPrice:goodsForm.value.unitPrice, quantity:goodsForm.value.quantity});
-  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': JSON.stringify(goodsList.value)}).then(response => {
+  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': strGoodsList(goodsList.value)}).then(response => {
     proxy.$modal.msgSuccess("新增成功");
     addGoodsOpen.value = false;
     getById();
@@ -216,7 +225,7 @@ function submitGoods() {
 }
 function removeGoods(index) {
   goodsList.value.splice(index, 1);
-  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': JSON.stringify(goodsList.value)}).then(response => {
+  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': strGoodsList(goodsList.value)}).then(response => {
     proxy.$modal.msgSuccess("删除成功");
     addGoodsOpen.value = false;
     getById();
@@ -225,10 +234,25 @@ function removeGoods(index) {
 
 function getById() {
   getPurchaseOrder(copyOrder.id).then(response => {
-    // copyOrder = reactive({ ...response.data });
-    // Object.assign(copyOrder, response.data);
-    assignNewObj(response.data);
+
+    //说明：getPurchaseOrder这个接口查询的只有进货单的基本信息，没有图片信息，
+    //也就是说response.data中的uploadFiles是空的。所以这里
+    //使用assignNewObj方法，将response.data赋值给copyOrder时，要忽略掉uploadFiles属性
+    assignNewObj(response.data, ['uploadFiles']);
     
+  });
+}
+
+function strGoodsList(goodsList) {
+  return goodsList.map(item => {
+    return `${item.name},${item.unitPrice},${item.quantity}`;
+  }).join(';');
+}
+
+function parseGoodsList(goodsListStr) {
+  return goodsListStr.split(';').map(item => {
+    const [name, unitPrice, quantity] = item.split(',');
+    return { name, unitPrice: parseInt(unitPrice), quantity: parseInt(quantity) };
   });
 }
 

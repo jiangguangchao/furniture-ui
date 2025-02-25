@@ -1,6 +1,14 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="供货商" prop="supplier">
+        <el-input
+          v-model="queryParams.supplier"
+          placeholder="请输入供货商"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="日期" style="width: 308px">
         <el-date-picker
           v-model="daterangePurchaseDate"
