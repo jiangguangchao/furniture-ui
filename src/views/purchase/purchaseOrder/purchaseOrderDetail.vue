@@ -21,6 +21,10 @@
         {{ parseTime(copyOrder.purchaseDate) }}
       </el-descriptions-item>
 
+      <el-descriptions-item label="家具类型">
+        {{ parseFrunitureCategory(copyOrder.frunitureCategory) }}
+      </el-descriptions-item>
+
       <el-descriptions-item label="到货状态">
         <dict-tag :options="purchase_arrival_status" :value="copyOrder.arrivalStatus" />
       </el-descriptions-item>
@@ -33,14 +37,22 @@
         {{ copyOrder.paidMoney }} 元
       </el-descriptions-item>
 
+      <el-descriptions-item label="物流">
+        <dict-tag :options="purchase_logistics" :value="copyOrder.logistics" />
+      </el-descriptions-item>
 
-      <el-descriptions-item label="手机">
+      <el-descriptions-item label="物流费">
+        {{ copyOrder.logisticsMoney }}
+      </el-descriptions-item>
+
+
+      <!-- <el-descriptions-item label="手机">
         {{ copyOrder.phone }}
       </el-descriptions-item>
 
       <el-descriptions-item label="微信">
         {{ copyOrder.weichat }}
-      </el-descriptions-item>
+      </el-descriptions-item> -->
 
       <el-descriptions-item label="创建时间">
         {{ parseTime(copyOrder.createTime) }}
@@ -71,13 +83,19 @@
         </el-table-column>
         <el-table-column prop="quantity" label="数量">
         </el-table-column>
+        <el-table-column label="家具类别" align="center" prop="frunitureCtgy">
+          <template #default="scope">
+            <span>{{ parseFrunitureCategory(scope.row.frunitureCtgy) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="totalPrice" label="总价">
           <template #default="scope">
             {{ scope.row.unitPrice * scope.row.quantity }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100">
+        <el-table-column label="操作" width="200">
           <template #default="scope">
+            <el-button size="mini" type="danger" @click="handleUpdateGoods(scope.row)">修改</el-button>
             <el-button size="mini" type="danger" @click="removeGoods(scope.$index)">删除</el-button>
           </template>
         </el-table-column>
@@ -100,10 +118,20 @@
         <el-input v-model="goodsForm.name" placeholder="请输入名称" />
       </el-form-item>
       <el-form-item label="单价" prop="unitPrice">
-        <el-input v-model.number="goodsForm.unitPrice" placeholder="请输入单价" />
+        <el-input-number v-model="goodsForm.unitPrice" :min="1" placeholder="请输入单价" />
       </el-form-item>
       <el-form-item label="数量" prop="quantity">
-        <el-input v-model.number="goodsForm.quantity" placeholder="请输入数量" />
+        <el-input-number v-model="goodsForm.quantity" :min="1" placeholder="请输入数量" />
+      </el-form-item>
+      <el-form-item label="家具类别" prop="frunitureCtgy">
+        <el-select v-model="goodsForm.frunitureCtgy" placeholder="请选择家具类别" style="width: 100px" clearable>
+          <el-option
+            v-for="dict in fruniture_category"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="总价" >
         {{ goodsForm.unitPrice * goodsForm.quantity }}
@@ -136,6 +164,8 @@ import { reactive } from "vue";
 
 const { proxy } = getCurrentInstance();
 const { purchase_arrival_status } = proxy.useDict("purchase_arrival_status");
+const { fruniture_category } = proxy.useDict('fruniture_category');
+const { purchase_logistics } = proxy.useDict('purchase_logistics');
 const goodsForm = ref({});
 const addGoodsOpen = ref(false);
 const updateOpen = ref(false);
@@ -157,7 +187,6 @@ const associationData = reactive({
 });
 
 watch(() => props.purchaseOrder, () => {
-  console.log("watch purchaseOrder", props.purchaseOrder);
   assignNewObj(props.purchaseOrder);
   associationData.associationId = props.purchaseOrder.id;
 });
@@ -182,10 +211,7 @@ assignNewObj(props.purchaseOrder);
 function assignNewObj(newObj, ignoreKeys) {
   customAssign(copyOrder, newObj, ignoreKeys); // 根据实际情况替换 ignoreKey1, ignoreKey2
   goodsList.value = copyOrder.goodsList ? parseGoodsList(copyOrder.goodsList) : [];
-  console.log("goodsList ", goodsList.value);
   fileUrlList.value = copyOrder.uploadFiles ? copyOrder.uploadFiles.map(item => item.filePath) : [];
-  console.log("assignNewObj方法中打印 fileUrlList ", fileUrlList.value);
-  console.log("assignNewObj方法中打印 copyOrder", copyOrder)
 }
 
 function handleGoodsAdd() {
@@ -193,7 +219,8 @@ function handleGoodsAdd() {
     name: '',
     unitPrice: '',
     quantity: '',
-    totalPrice: ''
+    totalPrice: '',
+    frunitureCtgy: ''
   };
   console.log("打开新增明细弹窗")
   addGoodsOpen.value = true;
@@ -215,17 +242,25 @@ function submitGoods() {
   }
 
   console.log("goodsList.value", goodsList.value);
-  goodsList.value.push({name:goodsForm.value.name, unitPrice:goodsForm.value.unitPrice, quantity:goodsForm.value.quantity});
-  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': strGoodsList(goodsList.value)}).then(response => {
+  goodsList.value.push({name:goodsForm.value.name, unitPrice:goodsForm.value.unitPrice, 
+    quantity:goodsForm.value.quantity, frunitureCtgy:goodsForm.value.frunitureCtgy});
+  
+  let updateDto = {'id':copyOrder.id, 'goodsList': strGoodsList(goodsList.value), 'frunitureCategory': getAllFurnitureCategories(goodsList.value)};
+  updatePurchaseOrder(updateDto).then(response => {
     proxy.$modal.msgSuccess("新增成功");
     addGoodsOpen.value = false;
     getById();
   });
 
 }
+
+function handleUpdateGoods(row) {
+
+}
 function removeGoods(index) {
   goodsList.value.splice(index, 1);
-  updatePurchaseOrder({'id':copyOrder.id, 'goodsList': strGoodsList(goodsList.value)}).then(response => {
+  let updateDto = {'id':copyOrder.id, 'goodsList': strGoodsList(goodsList.value), 'frunitureCategory': getAllFurnitureCategories(goodsList.value)};
+  updatePurchaseOrder(updateDto).then(response => {
     proxy.$modal.msgSuccess("删除成功");
     addGoodsOpen.value = false;
     getById();
@@ -245,20 +280,44 @@ function getById() {
 
 function strGoodsList(goodsList) {
   return goodsList.map(item => {
-    return `${item.name},${item.unitPrice},${item.quantity}`;
+    return `${item.name},${item.unitPrice},${item.quantity},${item.frunitureCtgy}`;
   }).join(';');
 }
 
 function parseGoodsList(goodsListStr) {
   return goodsListStr.split(';').map(item => {
-    const [name, unitPrice, quantity] = item.split(',');
-    return { name, unitPrice: parseInt(unitPrice), quantity: parseInt(quantity) };
+    const [name, unitPrice, quantity, frunitureCtgy] = item.split(',');
+    return { name, unitPrice: parseInt(unitPrice), quantity: parseInt(quantity), frunitureCtgy };
   });
+}
+
+function getAllFurnitureCategories(goodsList) {
+  return goodsList.map(item => {
+    return `${item.frunitureCtgy}`;
+  }).join(',');
 }
 
 function purchaseOrderupdated(){
   updateOpen.value = false;
   getById();
+}
+
+function parseFrunitureCategory(frunitureCategorys) {
+  if (!frunitureCategorys || frunitureCategorys.length === 0) {
+    return '';
+  }
+
+  // 将 frunitureCategorys 字符串按逗号分割成数组
+  const categoryIds = frunitureCategorys.split(',');
+
+  // 使用 fruniture_category.value 数组查找对应的 label
+  const categoryNames = categoryIds.map(id => {
+    const category = fruniture_category.value.find(cat => cat.value === id);
+    return category ? category.label : '';
+  });
+
+  // 将类别名称数组用逗号连接成字符串
+  return categoryNames.join(',');
 }
 
 onMounted(() => {

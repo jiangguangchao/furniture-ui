@@ -46,12 +46,16 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="物流" prop="logistics">
-            <el-input v-model="form.logistics" placeholder="请输入物流名称" />
+            <el-select v-model="form.logistics" clearable @change="logisticsChange">
+              <el-option v-for="dict in purchase_logistics" :key="dict.value" :label="dict.label"
+                :value="dict.value">
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="物流费" prop="logisticsMoney">
-            <el-input v-model="form.logisticsMoney" placeholder="请输入物流费" />
+            <el-input-number v-model="form.logisticsMoney" :min="0" placeholder="请输入物流费" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -73,6 +77,7 @@ import { eventBus } from "@/utils/eventBus";
 import { listPurchaseOrder, getPurchaseOrder, delPurchaseOrder, addPurchaseOrder, updatePurchaseOrder } from "@/api/purchase/purchaseOrder";
 const { proxy } = getCurrentInstance();
 const { purchase_arrival_status } = proxy.useDict('purchase_arrival_status');
+const { purchase_logistics } = proxy.useDict('purchase_logistics');
 
 // 接收 props
 const props = defineProps({
@@ -131,7 +136,7 @@ function reset() {
     weichat: null,
     orderList: null,
     totalAmount: null,
-    goodsList: [],
+    goodsList: null,
     remarks: null,
     uploadFiles: [],
     logistics: null, 
@@ -149,7 +154,7 @@ function submitForm() {
   proxy.$refs["purchaseOrderRef"].validate(valid => {
     if (valid) {
 
-      form.value.goodsList = JSON.stringify(form.value.goodsList);
+      form.value.goodsList = null;//防止goodsList被修改，因为当前页面不对goodsList做修改
 
       if (form.value.id != null) {
         //修改提交时不需要传uploadFiles，因为文件上传时已经绑定到了当前记录。
@@ -167,6 +172,12 @@ function submitForm() {
       }
     }
   });
+}
+
+function logisticsChange(value) {
+  if (value == '-1') {
+    form.value.logisticsMoney = 0;
+  }
 }
 
 // function getDefaultTime() {

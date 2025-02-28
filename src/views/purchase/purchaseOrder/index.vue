@@ -20,7 +20,7 @@
         ></el-date-picker>
       </el-form-item>
       <el-form-item label="到货状态" prop="arrivalStatus">
-        <el-select v-model="queryParams.arrivalStatus" placeholder="请选择到货状态" clearable>
+        <el-select v-model="queryParams.arrivalStatus" placeholder="请选择到货状态" style="width: 100px" clearable>
           <el-option
             v-for="dict in purchase_arrival_status"
             :key="dict.value"
@@ -29,6 +29,18 @@
           />
         </el-select>
       </el-form-item>
+
+      <el-form-item label="家具类别" prop="frunitureCategory">
+        <el-select v-model="queryParams.frunitureCategory" placeholder="请选择家具类别" style="width: 100px" clearable>
+          <el-option
+            v-for="dict in fruniture_category"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -77,9 +89,19 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="purchaseOrderList" @selection-change="handleSelectionChange">
+    <el-table 
+      v-loading="loading" 
+      :data="purchaseOrderList" 
+      @selection-change="handleSelectionChange"
+      :row-class-name="tableRowClassName"
+    >
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="供货方" align="center" prop="supplier" />
+      <el-table-column label="家具类别" align="center" prop="frunitureCategory">
+        <template #default="scope">
+          <span>{{ parseFrunitureCategory(scope.row.frunitureCategory) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="订货日期" align="center" prop="purchaseDate" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.purchaseDate, '{y}-{m}-{d}') }}</span>
@@ -90,10 +112,14 @@
           <dict-tag :options="purchase_arrival_status" :value="scope.row.arrivalStatus"/>
         </template>
       </el-table-column>
-      <el-table-column label="物流" align="center" prop="logistics" />
+      <el-table-column label="物流" align="center" prop="logistics">
+        <template #default="scope">
+          <dict-tag :options="purchase_logistics" :value="scope.row.logistics"/>
+        </template>
+      </el-table-column>
       <el-table-column label="物流费" align="center" prop="logisticsMoney" />
-      <el-table-column label="手机" align="center" prop="phone" />
-      <el-table-column label="微信" align="center" prop="weichat" />
+      <!-- <el-table-column label="手机" align="center" prop="phone" />
+      <el-table-column label="微信" align="center" prop="weichat" /> -->
       <el-table-column label="已支付金额" align="center" prop="paidMoney" />
       <el-table-column label="总金额" align="center" prop="totalAmount" />
       <el-table-column label="备注" align="center" prop="remarks" />
@@ -121,7 +147,7 @@
 
   
 
-  <el-dialog title="详情" v-model="detailOpen" width="700px" append-to-body>
+  <el-dialog title="详情" v-model="detailOpen" width="850px" append-to-body>
     <detailTab :purchaseOrder="currentPurchaseOrder"></detailTab>
   </el-dialog>
 
@@ -137,6 +163,8 @@ import { eventBus } from "@/utils/eventBus";
 
 const { proxy } = getCurrentInstance();
 const { purchase_arrival_status } = proxy.useDict('purchase_arrival_status');
+const { purchase_logistics } = proxy.useDict('purchase_logistics');
+const { fruniture_category } = proxy.useDict('fruniture_category');
 
 const purchaseOrderList = ref([]);
 const open = ref(false);
@@ -294,7 +322,19 @@ function handleExport() {
   }, `purchaseOrder_${new Date().getTime()}.xlsx`)
 }
 
-
+/** 根据到货状态设置表格行背景颜色 */
+function tableRowClassName({ row }) {
+  if (row.arrivalStatus === '0') {
+    return 'row-status-0'; // 未到货
+  } else if (row.arrivalStatus === '1') {
+    return 'row-status-1'; // 部分到货
+  } else if (row.arrivalStatus === '2') {
+    return 'row-status-2'; // 全部到货
+  } else if (row.arrivalStatus === '3') {
+    return 'row-status-3'; // 发货中
+  }
+  return '';
+}
 
 function handleUpload(fileList){
   if (!fileList || fileList.length == 0) {
@@ -312,9 +352,27 @@ function handleUpload(fileList){
   
 }
 
+function parseFrunitureCategory(frunitureCategorys) {
+  if (!frunitureCategorys || frunitureCategorys.length === 0) {
+    return '';
+  }
+
+  // 将 frunitureCategorys 字符串按逗号分割成数组
+  const categoryIds = frunitureCategorys.split(',');
+
+  // 使用 fruniture_category.value 数组查找对应的 label
+  const categoryNames = categoryIds.map(id => {
+    const category = fruniture_category.value.find(cat => cat.value === id);
+    return category ? category.label : '';
+  });
+
+  // 将类别名称数组用逗号连接成字符串
+  return categoryNames.join(',');
+}
+
 function getFileId(path) {
   // 找到最后一个斜杠的位置
-  const lastSlashIndex = path.lastIndexOf('/');
+  const lastSlashIndex = path.lastIndexOf('/');//fruniture_category
   // 提取从最后一个斜杠之后的部分
   const fileNameWithExtension = path.substring(lastSlashIndex + 1);
   // 去除后缀名
@@ -332,3 +390,21 @@ onUnmounted(() => {
 
 getList();
 </script>
+
+<style>
+.el-table .row-status-0 {
+  background-color: #f89898; /* 未到货 - 红色背景 */
+}
+
+.el-table .row-status-1 {
+  background-color: #fcd3d3; /* 部分到货 - 橙色背景 */
+}
+
+.el-table .row-status-2 {
+  background-color: #95d475; /* 全部到货 - 绿色背景 */
+}
+
+.el-table .row-status-3 {
+  background-color: #c6e2ff; /* 发货中 - 蓝色背景 */
+}
+</style>

@@ -9,7 +9,7 @@
     <el-table v-loading="loading" :data="paymentRecordList" @selection-change="handleSelectionChange" border>
       <el-table-column type="expand">
         <template #default="scope">
-          <el-card class="box-card">
+          <el-card class="box-card" style="margin-bottom: 10px; background-color: #f0f0f0;">
             <div style="display: flex; justify-content: space-between;">
               <div>
                 <span>支付记录编号: {{ scope.row.id }}</span><br>
@@ -23,7 +23,7 @@
               </div>
             </div>
           </el-card>
-          <el-card class="box-card">
+          <el-card class="box-card" style="background-color: #f0f0f0;">
             <ImageUpload :modelValue="scope.row.uploadFiles.map(item => item.filePath)" 
               :associationData="{ associationId: scope.row.id, associationType: 'PR' }"/>
           </el-card>
@@ -40,6 +40,8 @@
           <dict-tag :options="payment_method" :value="scope.row.paymentMethod" />
         </template>
       </el-table-column>
+      <el-table-column label="支付人" align="center" prop="payer" />
+      <el-table-column label="收款人" align="center" prop="payee" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -60,13 +62,21 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item label="支付金额" prop="paymentAmount">
-          <el-input v-model="form.paymentAmount" placeholder="请输入支付金额" />
+          <el-input-number v-model="form.paymentAmount" placeholder="请输入支付金额" />
         </el-form-item>
         <el-form-item label="支付方式" prop="paymentMethod">
           <el-select v-model="form.paymentMethod" placeholder="请选择支付方式">
             <el-option v-for="dict in payment_method" :key="dict.value" :label="dict.label"
               :value="dict.value"></el-option>
           </el-select>
+        </el-form-item>
+
+        <el-form-item label="支付人" prop="payer">
+          <el-input v-model="form.payer" placeholder="请输入支付金额" />
+        </el-form-item>
+
+        <el-form-item label="收款人" prop="payee">
+          <el-input v-model="form.payee" placeholder="请输入支付金额" />
         </el-form-item>
 
         <el-form-item label="备注" prop="remark">
