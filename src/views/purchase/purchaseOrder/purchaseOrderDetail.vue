@@ -74,18 +74,28 @@
         <span>清单明细</span>
       </div>
     </template>
-    <div class="goods-list">
-      <el-button type="primary" @click="handleGoodsAdd" style="margin-bottom: 10px;">新增</el-button>
-      <el-table :data="goodsList" style="width: 100%">
+    <div class="item-list">
+      <el-button type="primary" @click="handleItemAdd" style="margin-bottom: 10px;">新增</el-button>
+      <el-table :data="itemList" style="width: 100%">
+        <el-table-column type="expand">
+          <template #default="scope">
+            <el-card class="box-card" style="background-color: #f0f0f0;">
+              <ImageUpload :modelValue="scope.row.uploadFiles.map(item => item.filePath)"
+                :associationData="{ associationId: scope.row.id, associationType: 'POI' }" />
+            </el-card>
+          </template>
+        </el-table-column>
+        <el-table-column prop="purchaseOrderId" label="进货单id" v-show="false">
+        </el-table-column>
         <el-table-column prop="name" label="名称">
         </el-table-column>
         <el-table-column prop="unitPrice" label="单价">
         </el-table-column>
         <el-table-column prop="quantity" label="数量">
         </el-table-column>
-        <el-table-column label="家具类别" align="center" prop="frunitureCtgy">
+        <el-table-column label="家具类别" align="center" prop="type">
           <template #default="scope">
-            <span>{{ parseFrunitureCategory(scope.row.frunitureCtgy) }}</span>
+            <span>{{ parseFrunitureCategory(scope.row.type) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="totalPrice" label="总价">
@@ -95,8 +105,8 @@
         </el-table-column>
         <el-table-column label="操作" width="200">
           <template #default="scope">
-            <el-button size="mini" type="danger" @click="handleUpdateGoods(scope.row)">修改</el-button>
-            <el-button size="mini" type="danger" @click="removeGoods(scope.$index)">删除</el-button>
+            <el-button size="mini" type="danger" @click="handleUpdateItem(scope.row)">修改</el-button>
+            <el-button size="mini" type="danger" @click="removeItem(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -112,43 +122,39 @@
     <ImageUpload :modelValue="fileUrlList" :associationData="associationData"></ImageUpload>
   </el-card>
 
-  <el-dialog title="新增明细" v-model="addGoodsOpen" width="400">
-    <el-form ref="goodsFormRef" :model="goodsForm" label-width="80px">
+  <el-dialog title="新增明细" v-model="addItemOpen" width="400">
+    <el-form ref="itemFormRef" :model="itemForm" label-width="80px">
       <el-form-item label="名称" prop="name">
-        <el-input v-model="goodsForm.name" placeholder="请输入名称" />
+        <el-input v-model="itemForm.name" placeholder="请输入名称" />
       </el-form-item>
       <el-form-item label="单价" prop="unitPrice">
-        <el-input-number v-model="goodsForm.unitPrice" :min="1" placeholder="请输入单价" />
+        <el-input-number v-model="itemForm.unitPrice" :min="1" placeholder="请输入单价" />
       </el-form-item>
       <el-form-item label="数量" prop="quantity">
-        <el-input-number v-model="goodsForm.quantity" :min="1" placeholder="请输入数量" />
+        <el-input-number v-model="itemForm.quantity" :min="1" placeholder="请输入数量" />
       </el-form-item>
-      <el-form-item label="家具类别" prop="frunitureCtgy">
-        <el-select v-model="goodsForm.frunitureCtgy" placeholder="请选择家具类别" style="width: 100px" clearable>
-          <el-option
-            v-for="dict in fruniture_category"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+      <el-form-item label="家具类别" prop="type">
+        <el-select v-model="itemForm.type" placeholder="请选择家具类别" style="width: 100px" clearable>
+          <el-option v-for="dict in fruniture_category" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="总价" >
-        {{ goodsForm.unitPrice * goodsForm.quantity }}
+      <el-form-item label="总价">
+        {{ itemForm.unitPrice * itemForm.quantity }}
       </el-form-item>
 
     </el-form>
-    
+
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="primary" @click="submitGoods">确 定</el-button>
-        <el-button @click="cancelGoods">取 消</el-button>
+        <el-button type="primary" @click="submitItem">确 定</el-button>
+        <el-button @click="cancelItem">取 消</el-button>
       </div>
     </template>
   </el-dialog>
 
   <!--修改-->
-  <el-dialog title="修改进货单" :inline="true" v-model="updateOpen" destroy-on-close @close="closeUpdateDlg" width="700px" append-to-body>
+  <el-dialog title="修改进货单" :inline="true" v-model="updateOpen" destroy-on-close @close="closeUpdateDlg" width="700px"
+    append-to-body>
     <purchaseOrderEdit :purchaseOrder="purchaseOrder" />
   </el-dialog>
 
@@ -157,7 +163,10 @@
 
 <script setup>
 
-import { listPurchaseOrder, getPurchaseOrder, delPurchaseOrder, addPurchaseOrder, updatePurchaseOrder } from "@/api/purchase/purchaseOrder";
+import { getPurchaseOrder, updatePurchaseOrder } from "@/api/purchase/purchaseOrder";
+import { listPurchaseOrderItem, addPurchaseOrderItem, updatePurchaseOrderItem, delPurchaseOrderItem }
+  from "@/api/purchase/purchaseOrderItem";
+
 import purchaseOrderEdit from "./purchaseOrderEdit.vue";
 import { eventBus } from "@/utils/eventBus";
 import { reactive } from "vue";
@@ -166,11 +175,11 @@ const { proxy } = getCurrentInstance();
 const { purchase_arrival_status } = proxy.useDict("purchase_arrival_status");
 const { fruniture_category } = proxy.useDict('fruniture_category');
 const { purchase_logistics } = proxy.useDict('purchase_logistics');
-const goodsForm = ref({});
-const addGoodsOpen = ref(false);
+const itemForm = ref({});
+const addItemOpen = ref(false);
 const updateOpen = ref(false);
 const fileUrlList = ref([]);
-const goodsList = ref([]);
+const itemList = ref([]);
 
 
 // 接收 props
@@ -186,9 +195,12 @@ const associationData = reactive({
   associationType: "PO",
 });
 
+
+
 watch(() => props.purchaseOrder, () => {
   assignNewObj(props.purchaseOrder);
   associationData.associationId = props.purchaseOrder.id;
+  getItemList();
 });
 
 var copyOrder = reactive({});
@@ -210,20 +222,26 @@ function customAssign(target, source, ignoreKeys) {
 assignNewObj(props.purchaseOrder);
 function assignNewObj(newObj, ignoreKeys) {
   customAssign(copyOrder, newObj, ignoreKeys); // 根据实际情况替换 ignoreKey1, ignoreKey2
-  goodsList.value = copyOrder.goodsList ? parseGoodsList(copyOrder.goodsList) : [];
   fileUrlList.value = copyOrder.uploadFiles ? copyOrder.uploadFiles.map(item => item.filePath) : [];
 }
 
-function handleGoodsAdd() {
-  goodsForm.value = {
+getItemList();
+function getItemList() {
+  listPurchaseOrderItem({ purchaseOrderId: copyOrder.id }).then(response => {
+    itemList.value = response.rows;
+  });
+}
+
+function handleItemAdd() {
+  itemForm.value = {
     name: '',
     unitPrice: '',
     quantity: '',
     totalPrice: '',
-    frunitureCtgy: ''
+    type: '',
+    purchaseOrderId: copyOrder.id
   };
-  console.log("打开新增明细弹窗")
-  addGoodsOpen.value = true;
+  addItemOpen.value = true;
 }
 
 /** 修改按钮操作 */
@@ -231,39 +249,47 @@ function handleUpdate() {
   updateOpen.value = true;
 }
 
-function closeUpdateDlg(){
-  console.log("关闭修改弹窗")
+function closeUpdateDlg() {
   updateOpen.value = false;
 }
 
-function submitGoods() {
-  if (!goodsForm.value.name || !goodsForm.value.unitPrice || !goodsForm.value.quantity) {
+function submitItem() {
+  if (!itemForm.value.name || !itemForm.value.unitPrice || !itemForm.value.quantity) {
     return;
   }
 
-  console.log("goodsList.value", goodsList.value);
-  goodsList.value.push({name:goodsForm.value.name, unitPrice:goodsForm.value.unitPrice, 
-    quantity:goodsForm.value.quantity, frunitureCtgy:goodsForm.value.frunitureCtgy});
-  
-  let updateDto = {'id':copyOrder.id, 'goodsList': strGoodsList(goodsList.value), 'frunitureCategory': getAllFurnitureCategories(goodsList.value)};
-  updatePurchaseOrder(updateDto).then(response => {
-    proxy.$modal.msgSuccess("新增成功");
-    addGoodsOpen.value = false;
-    getById();
-  });
+  itemForm.value.purchaseOrderId = copyOrder.id;
+  if (itemForm.value.id) {
+    updatePurchaseOrderItem(itemForm.value).then(response => {
+      proxy.$modal.msgSuccess("修改成功");
+      addItemOpen.value = false;
+      getById();
+      getItemList();
+    });
+  } else {
+    addPurchaseOrderItem(itemForm.value).then(response => {
+      proxy.$modal.msgSuccess("新增成功");
+      addItemOpen.value = false;
+      getById();
+      getItemList();
+    });
+  }
+
 
 }
 
-function handleUpdateGoods(row) {
+function handleUpdateItem(row) {
+  addItemOpen.value = true;
 
+  //itemForm.value = row; //这是浅拷贝，会改变原数据
+  itemForm.value = JSON.parse(JSON.stringify(row));//这是深拷贝，不影响原数据
 }
-function removeGoods(index) {
-  goodsList.value.splice(index, 1);
-  let updateDto = {'id':copyOrder.id, 'goodsList': strGoodsList(goodsList.value), 'frunitureCategory': getAllFurnitureCategories(goodsList.value)};
-  updatePurchaseOrder(updateDto).then(response => {
+function removeItem(row) {
+  delPurchaseOrderItem(row).then(response => {
     proxy.$modal.msgSuccess("删除成功");
-    addGoodsOpen.value = false;
+    addItemOpen.value = false;
     getById();
+    getItemList();
   });
 }
 
@@ -274,30 +300,12 @@ function getById() {
     //也就是说response.data中的uploadFiles是空的。所以这里
     //使用assignNewObj方法，将response.data赋值给copyOrder时，要忽略掉uploadFiles属性
     assignNewObj(response.data, ['uploadFiles']);
-    
+
   });
 }
 
-function strGoodsList(goodsList) {
-  return goodsList.map(item => {
-    return `${item.name},${item.unitPrice},${item.quantity},${item.frunitureCtgy}`;
-  }).join(';');
-}
 
-function parseGoodsList(goodsListStr) {
-  return goodsListStr.split(';').map(item => {
-    const [name, unitPrice, quantity, frunitureCtgy] = item.split(',');
-    return { name, unitPrice: parseInt(unitPrice), quantity: parseInt(quantity), frunitureCtgy };
-  });
-}
-
-function getAllFurnitureCategories(goodsList) {
-  return goodsList.map(item => {
-    return `${item.frunitureCtgy}`;
-  }).join(',');
-}
-
-function purchaseOrderupdated(){
+function purchaseOrderupdated() {
   updateOpen.value = false;
   getById();
 }
