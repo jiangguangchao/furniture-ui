@@ -237,7 +237,7 @@ function submitForm() {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
-          eventBus.emit(props.associationType + ":orderupdated");
+          eventBus.emit(props.associationType + ":orderUpdated");
         });
       }
     }
@@ -252,7 +252,7 @@ function handleDelete(row) {
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
-    eventBus.emit(props.associationType + ":orderupdated");
+    eventBus.emit(props.associationType + ":orderUpdated");
   }).catch(() => { });
 }
 

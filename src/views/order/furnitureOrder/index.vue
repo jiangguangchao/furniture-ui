@@ -468,11 +468,11 @@ function handleExport() {
 }
 
 onMounted(() => {
-  eventBus.on('FO:orderupdated', getList);
+  eventBus.on('FO:orderUpdated', getList);
 });
 
 onUnmounted(() => {
-  eventBus.off('FO:orderupdated', getList);
+  eventBus.off('FO:orderUpdated', getList);
 });
 
 getList();

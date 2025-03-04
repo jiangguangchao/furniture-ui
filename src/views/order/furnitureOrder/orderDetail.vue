@@ -56,7 +56,7 @@
     </el-descriptions-item>
 
     <el-descriptions-item label="村庄">
-      {{ localOrder.sub_village || '-' }}
+      {{ localOrder.subVillage || '-' }}
     </el-descriptions-item>
 
     <el-descriptions-item label="创建时间">
@@ -72,7 +72,7 @@
     </el-descriptions-item>
   </el-descriptions>
 
-  <el-dialog title="修改订单" v-model="open" width="500px" append-to-body>
+  <el-dialog title="修改订单" v-model="open" width="500px" destroy-on-close append-to-body>
     <orderEdit :order="order" />
   </el-dialog>
 
@@ -114,6 +114,7 @@ function handleUpdate() {
 
 function assignNewObj(newObj) {
   Object.assign(localOrder, newObj);
+  console.log("localOrder", localOrder);
 }
 
 function getById() {
@@ -126,13 +127,22 @@ function getById() {
   })
 }
 
+function closeEditDlg() {
+  open.value = false;
+}
+
 
 onMounted(() => {
-  eventBus.on('FO:orderupdated', getById);
+  eventBus.on('FO:orderUpdated', getById);
+  eventBus.on('FO:orderUpdated', closeEditDlg);
+  eventBus.on('FO:closeEditDlg', closeEditDlg);
+
 });
 
 onUnmounted(() => {
-  eventBus.off('FO:orderupdated', getById);
+  eventBus.off('FO:orderUpdated', getById);
+  eventBus.off('FO:orderUpdated', closeEditDlg);
+  eventBus.off('FO:closeEditDlg', closeEditDlg);
 });
 
 </script>

@@ -381,11 +381,11 @@ function getFileId(path) {
 }
 
 onMounted(() => {
-  eventBus.on('PO:orderupdated', getList);
+  eventBus.on('PO:orderUpdated', getList);
 });
 
 onUnmounted(() => {
-  eventBus.off('PO:orderupdated', getList);
+  eventBus.off('PO:orderUpdated', getList);
 });
 
 getList();

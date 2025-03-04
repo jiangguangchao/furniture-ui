@@ -162,12 +162,12 @@ function submitForm() {
         form.value.uploadFiles = [];
         updatePurchaseOrder(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
-          eventBus.emit(associationType + ":orderupdated");
+          eventBus.emit(associationType + ":orderUpdated");
         });
       } else {
         addPurchaseOrder(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
-          eventBus.emit(associationType + ":orderupdated");
+          eventBus.emit(associationType + ":orderUpdated");
         });
       }
     }

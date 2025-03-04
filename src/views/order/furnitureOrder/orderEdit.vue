@@ -1,4 +1,5 @@
 <template>
+    
     <div class="app-container">
         <el-form ref="furnitureOrderRef" :model="form" :rules="rules" label-width="80px">
             <el-form-item label="总金额" prop="totalMoney">
@@ -66,108 +67,76 @@ import {
   updateFurnitureOrder,
 } from "@/api/order/furnitureOrder";
 import useDistrictsStore from "@/store/modules/districts";
-// import { eventBus } from "../../../utils/eventBus";
 import { eventBus } from "@/utils/eventBus";
 import { parseTime } from "element-plus/es/components/time-select/src/utils.mjs";
+
 const districtsStore = useDistrictsStore();
 const { proxy } = getCurrentInstance();
 const { order_status } = proxy.useDict("order_status");
 
 // 接收 props
 const props = defineProps({
-    order: {
-        type: Object,
-        required: false,
-    },
+  order: {
+    type: Object,
+    required: false,
+  },
 });
 
 const mytime = parseTime();
 
-
 // 使用 toRefs 将 reactive 对象转换为普通对象
-let copyOrder = null;
-if (props.order) {
-    //父组件传入了order对象，说明是修改
-    copyOrder = toRefs(reactive({ ...props.order }));
-} else {
-    //父组件没有传入order对象，说明是新增
-    copyOrder = toRefs(reactive({
-        id: null,
-        totalMoney: 0,
-        paidMoney: 0,
-        orderStatus: "1",
-        orderTime: parseTime(),
-        orderUser: null,
-        phoneNumber: null,
-        district: '411723',
-        town: "411723103",
-        village: null,
-        dui: null,
-        subVillage: null,
-        remark: null,
-        includeCustom: 'N'
-    }));
-}
+let copyOrder = reactive({
+  id: null,
+  totalMoney: 0,
+  paidMoney: 0,
+  orderStatus: "1",
+  orderTime: parseTime(),
+  orderUser: null,
+  phoneNumber: null,
+  district: '411723',
+  town: "411723103",
+  village: null,
+  dui: null,
+  subVillage: null,
+  remark: null,
+  includeCustom: 'N'
+});
 
-const townArr = computed(() => districtsStore.getDistrictsByPCode("411723"));//取平舆县的乡镇
-const villageArr = computed(() =>
-  districtsStore.getDistrictsByPCode("411723103")
-);
+
+const townArr = computed(() => districtsStore.getDistrictsByPCode("411723")); // 取平舆县的乡镇
+const villageArr = computed(() => districtsStore.getDistrictsByPCode("411723103"));
 
 const data = reactive({
-    form: copyOrder,
-    queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        id: null,
-        totalMoney: null,
-        orderStatus: null,
-        orderTime: null,
-        orderUser: null,
-        phoneNumber: null,
-        town: "411723103",
-        village: null,
-        includeCustom: 'N'
-    },
-    rules: {
-        orderStatus: [
-            { required: true, message: "订单状态不能为空", trigger: "change" },
-        ],
-        orderUser: [{ required: true, message: "下单人不能为空", trigger: "blur" }],
-        phoneNumber: [
-            { required: true, message: "联系电话不能为空", trigger: "blur" },
-        ],
-    },
+  form: { ...props.order },
+  queryParams: {
+    pageNum: 1,
+    pageSize: 10,
+    id: null,
+    totalMoney: null,
+    orderStatus: null,
+    orderTime: null,
+    orderUser: null,
+    phoneNumber: null,
+    town: "411723103",
+    village: null,
+    includeCustom: 'N'
+  },
+  rules: {
+    orderStatus: [
+      { required: true, message: "订单状态不能为空", trigger: "change" },
+    ],
+    orderUser: [{ required: true, message: "下单人不能为空", trigger: "blur" }],
+    phoneNumber: [
+      { required: true, message: "联系电话不能为空", trigger: "blur" },
+    ],
+  },
 });
 
 const { queryParams, form, rules } = toRefs(data);
 
 function cancel() {
-    open.value = false;
-    reset();
+  eventBus.emit("FO:closeEditDlg");
 }
-
-// 表单重置
-function reset() {
-    form.value = {
-        id: null,
-        totalMoney: 0,
-        paidMoney: null,
-        orderStatus: "1",
-        orderTime: null,
-        orderUser: null,
-        phoneNumber: null,
-        district: '411723',
-        town: "411723103",
-        village: null,
-        dui: null,
-        subVillage: null,
-        remark: null,
-        includeCustom: 'N'
-    };
-    proxy.resetForm("furnitureOrderRef");
-}
-
 
 /** 提交按钮 */
 function submitForm() {
@@ -176,21 +145,15 @@ function submitForm() {
       if (form.value.id != null) {
         updateFurnitureOrder(form.value).then((response) => {
           proxy.$modal.msgSuccess("修改成功");
-          open.value = false;
-          eventBus.emit("orderUpdated")
+          eventBus.emit('FO:orderUpdated');
         });
       } else {
         addFurnitureOrder(form.value).then((response) => {
           proxy.$modal.msgSuccess("新增成功");
-          open.value = false;
-          eventBus.emit("orderUpdated")
+          eventBus.emit("FO:orderUpdated");
         });
       }
     }
   });
 }
-
-
-
-
 </script>

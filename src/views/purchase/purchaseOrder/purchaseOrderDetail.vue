@@ -85,8 +85,6 @@
             </el-card>
           </template>
         </el-table-column>
-        <el-table-column prop="purchaseOrderId" label="进货单id" v-show="false">
-        </el-table-column>
         <el-table-column prop="name" label="名称">
         </el-table-column>
         <el-table-column prop="unitPrice" label="单价">
@@ -283,6 +281,7 @@ function handleUpdateItem(row) {
 
   //itemForm.value = row; //这是浅拷贝，会改变原数据
   itemForm.value = JSON.parse(JSON.stringify(row));//这是深拷贝，不影响原数据
+  itemForm.value.purchaseOrderId = copyOrder.id;
 }
 function removeItem(row) {
   delPurchaseOrderItem(row).then(response => {
@@ -329,11 +328,11 @@ function parseFrunitureCategory(frunitureCategorys) {
 }
 
 onMounted(() => {
-  eventBus.on('PO:orderupdated', purchaseOrderupdated);
+  eventBus.on('PO:orderUpdated', purchaseOrderupdated);
 });
 
 onUnmounted(() => {
-  eventBus.on('PO:orderupdated', purchaseOrderupdated);
+  eventBus.on('PO:orderUpdated', purchaseOrderupdated);
 });
 
 </script>
