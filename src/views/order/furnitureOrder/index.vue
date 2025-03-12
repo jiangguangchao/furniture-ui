@@ -318,7 +318,7 @@ const data = reactive({
     orderTime: null,
     orderUser: null,
     phoneNumber: null,
-    town: "411723103",
+    town: null,
     village: null,
   },
   rules: {
@@ -467,12 +467,18 @@ function handleExport() {
   );
 }
 
+function closeEditDlg() {
+  open.value = false;
+}
+
 onMounted(() => {
   eventBus.on('FO:orderUpdated', getList);
+  eventBus.on('FO:orderUpdated', closeEditDlg);
 });
 
 onUnmounted(() => {
   eventBus.off('FO:orderUpdated', getList);
+  eventBus.off('FO:orderUpdated', closeEditDlg);
 });
 
 getList();

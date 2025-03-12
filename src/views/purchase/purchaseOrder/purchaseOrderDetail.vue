@@ -9,8 +9,8 @@
     </template>
     <el-descriptions class="margin-top" :column="2" size="default" border>
       <template #extra>
-        <el-button type="primary">刷新</el-button>
-        <el-button type="primary" @click="handleUpdate()">修改</el-button>
+        <!--如果到货状态是‘全部到货’，则不能修改-->
+        <el-button type="primary" v-if="copyOrder.arrivalStatus!='2'" @click="handleUpdate()">修改</el-button>
       </template>
 
       <el-descriptions-item label="供货方">
@@ -22,7 +22,7 @@
       </el-descriptions-item>
 
       <el-descriptions-item label="家具类型">
-        {{ parseFrunitureCategory(copyOrder.frunitureCategory) }}
+        {{ parseFurnitureCategory(copyOrder.furnitureCategory) }}
       </el-descriptions-item>
 
       <el-descriptions-item label="到货状态">
@@ -75,13 +75,15 @@
       </div>
     </template>
     <div class="item-list">
-      <el-button type="primary" @click="handleItemAdd" style="margin-bottom: 10px;">新增</el-button>
+      <!--如果到货状态是‘全部到货’，则不能新增-->
+      <el-button type="primary" @click="handleItemAdd" v-if="copyOrder.arrivalStatus!='2'" style="margin-bottom: 10px;">新增</el-button>
       <el-table :data="itemList" style="width: 100%">
         <el-table-column type="expand">
           <template #default="scope">
             <el-card class="box-card" style="background-color: #f0f0f0;">
               <ImageUpload :modelValue="scope.row.uploadFiles.map(item => item.filePath)"
-                :associationData="{ associationId: scope.row.id, associationType: 'POI' }" />
+                :picAssociationData="{ picAssociationId: scope.row.id, picAssociationType: 'POI' }" 
+                :uploadDisabled="copyOrder.arrivalStatus=='2'"/>
             </el-card>
           </template>
         </el-table-column>
@@ -93,7 +95,7 @@
         </el-table-column>
         <el-table-column label="家具类别" align="center" prop="type">
           <template #default="scope">
-            <span>{{ parseFrunitureCategory(scope.row.type) }}</span>
+            <span>{{ parseFurnitureCategory(scope.row.type) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="totalPrice" label="总价">
@@ -101,7 +103,8 @@
             {{ scope.row.unitPrice * scope.row.quantity }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <!--如果到货状态是‘全部到货’，则不能修改和删除-->
+        <el-table-column label="操作" width="200" v-if="copyOrder.arrivalStatus!='2'">
           <template #default="scope">
             <el-button size="mini" type="danger" @click="handleUpdateItem(scope.row)">修改</el-button>
             <el-button size="mini" type="danger" @click="removeItem(scope.row)">删除</el-button>
@@ -117,7 +120,11 @@
         <span>图片</span>
       </div>
     </template>
-    <ImageUpload :modelValue="fileUrlList" :associationData="associationData"></ImageUpload>
+    <!--如果到货状态是‘全部到货’，则不能再上传图片-->
+    <ImageUpload :modelValue="fileUrlList" 
+      :picAssociationData="associationData" 
+      :uploadDisabled="copyOrder.arrivalStatus=='2'">
+    </ImageUpload>
   </el-card>
 
   <el-dialog title="新增明细" v-model="addItemOpen" width="400">
@@ -133,7 +140,7 @@
       </el-form-item>
       <el-form-item label="家具类别" prop="type">
         <el-select v-model="itemForm.type" placeholder="请选择家具类别" style="width: 100px" clearable>
-          <el-option v-for="dict in fruniture_category" :key="dict.value" :label="dict.label" :value="dict.value" />
+          <el-option v-for="dict in furniture_category" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>
       <el-form-item label="总价">
@@ -171,7 +178,7 @@ import { reactive } from "vue";
 
 const { proxy } = getCurrentInstance();
 const { purchase_arrival_status } = proxy.useDict("purchase_arrival_status");
-const { fruniture_category } = proxy.useDict('fruniture_category');
+const { furniture_category } = proxy.useDict('furniture_category');
 const { purchase_logistics } = proxy.useDict('purchase_logistics');
 const itemForm = ref({});
 const addItemOpen = ref(false);
@@ -189,15 +196,15 @@ const props = defineProps({
 });
 
 const associationData = reactive({
-  associationId: props.purchaseOrder.id,
-  associationType: "PO",
+  picAssociationId: props.purchaseOrder.id,
+  picAssociationType: "PO",
 });
 
 
 
 watch(() => props.purchaseOrder, () => {
   assignNewObj(props.purchaseOrder);
-  associationData.associationId = props.purchaseOrder.id;
+  associationData.picAssociationId = props.purchaseOrder.id;
   getItemList();
 });
 
@@ -309,17 +316,17 @@ function purchaseOrderupdated() {
   getById();
 }
 
-function parseFrunitureCategory(frunitureCategorys) {
-  if (!frunitureCategorys || frunitureCategorys.length === 0) {
+function parseFurnitureCategory(furnitureCategorys) {
+  if (!furnitureCategorys || furnitureCategorys.length === 0) {
     return '';
   }
 
-  // 将 frunitureCategorys 字符串按逗号分割成数组
-  const categoryIds = frunitureCategorys.split(',');
+  // 将 furnitureCategorys 字符串按逗号分割成数组
+  const categoryIds = furnitureCategorys.split(',');
 
-  // 使用 fruniture_category.value 数组查找对应的 label
+  // 使用 furniture_category.value 数组查找对应的 label
   const categoryNames = categoryIds.map(id => {
-    const category = fruniture_category.value.find(cat => cat.value === id);
+    const category = furniture_category.value.find(cat => cat.value === id);
     return category ? category.label : '';
   });
 

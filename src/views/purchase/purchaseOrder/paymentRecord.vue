@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
+        <el-button type="primary" plain icon="Plus" @click="handleAdd" v-if="editFlag">新增</el-button>
       </el-col>
     </el-row>
 
@@ -25,7 +25,8 @@
           </el-card>
           <el-card class="box-card" style="background-color: #f0f0f0;">
             <ImageUpload :modelValue="scope.row.uploadFiles.map(item => item.filePath)" 
-              :associationData="{ associationId: scope.row.id, associationType: 'PR' }"/>
+              :picAssociationData="{ picAssociationId: scope.row.id, picAssociationType: 'PR' }"
+              :uploadDisabled="!editFlag"/>
           </el-card>
         </template>
       </el-table-column>
@@ -43,7 +44,7 @@
       <el-table-column label="支付人" align="center" prop="payer" />
       <el-table-column label="收款人" align="center" prop="payee" />
       <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" v-if="editFlag">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
             v-hasPermi="['order:paymentRecord:edit']">修改</el-button>
@@ -99,23 +100,6 @@ import { parseTime } from "@/utils/ruoyi";
 import { eventBus } from "@/utils/eventBus";
 import { ref } from "vue";
 
-// 接收 props
-const props = defineProps({
-  order: {
-    type: Object,
-    required: true,
-  },
-  associationType: {
-    type: String,
-    default: ""
-  }
-});
-
-watch(() => props.order, () => {
-  console.log("查询订单支付记录", props.order);
-  getList();
-});
-
 const { proxy } = getCurrentInstance();
 const { payment_method } = proxy.useDict("payment_method");
 
@@ -128,7 +112,32 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
-const fileUrlList = ref([]);
+const editFlag = ref(true);
+
+// 接收 props
+const props = defineProps({
+  order: {
+    type: Object,
+    required: true,
+  },
+  /**支付记录关联的主体，支付记录关联的主体有家具订单（FO）和进货单（PO） */
+  PrAssociationType: {
+    type: String,
+    default: ""
+  }
+});
+
+modifyEditFlag();
+
+watch(() => props.order, () => {
+  modifyEditFlag();
+  console.log("props.PrAssociationType", props.PrAssociationType, props.order.arrivalStatus, editFlag.value);
+  getList();
+});
+
+
+
+
 
 const data = reactive({
   form: {},
@@ -136,7 +145,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 1000,
     orderId: null,
-    associationType: props.associationType,
+    PrAssociationType: props.PrAssociationType,
   },
   rules: {
     orderId: [
@@ -179,7 +188,7 @@ function reset() {
     paymentMethod: null,
     paymentAmount: null,
     remark: null,
-    associationType: props.associationType
+    associationType: props.PrAssociationType
   };
   proxy.resetForm("paymentRecordRef");
 }
@@ -237,7 +246,7 @@ function submitForm() {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
-          eventBus.emit(props.associationType + ":orderUpdated");
+          eventBus.emit(props.PrAssociationType + ":orderUpdated");
         });
       }
     }
@@ -252,7 +261,7 @@ function handleDelete(row) {
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
-    eventBus.emit(props.associationType + ":orderUpdated");
+    eventBus.emit(props.PrAssociationType + ":orderUpdated");
   }).catch(() => { });
 }
 
@@ -261,6 +270,22 @@ function handleExport() {
   proxy.download('order/paymentRecord/export', {
     ...queryParams.value
   }, `paymentRecord_${new Date().getTime()}.xlsx`)
+}
+
+function modifyEditFlag() {
+  editFlag.value = true;
+  console.log("watch order----------------1");
+  if (props.PrAssociationType == 'FO' && props.order.orderStatus != '1') {
+    //如果是家具订单，并且订单状态不是‘进行中’（不是‘进行中’就是‘已完成’或者‘已取消’），则不能修改
+    console.log("watch order----------------2");
+      editFlag.value = false;
+  } else if (props.PrAssociationType == 'PO' && props.order.arrivalStatus == '2') {
+      //如果是进货单，并且状态是全部收货，则不能修改
+      console.log("watch order----------------3");
+      editFlag.value = false;
+  }
+
+  console.log("editFlag:", editFlag.value);
 }
 
 getList();

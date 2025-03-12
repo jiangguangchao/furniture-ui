@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mb8" v-if="order.orderStatus =='1'">
       <el-col :span="1.5">
         <el-button
           type="primary"
@@ -43,7 +43,7 @@
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
       
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" v-if="order.orderStatus =='1'" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['order:deliveryRecord:edit']">修改</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['order:deliveryRecord:remove']">删除</el-button>

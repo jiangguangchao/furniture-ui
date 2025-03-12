@@ -118,7 +118,7 @@ const data = reactive({
     pageNum: 1,
     pageSize: 1000,
     orderId: null,
-    associationType: 'FO'
+    PrAssociationType: 'FO'
   },
   rules: {
     orderId: [
@@ -163,7 +163,7 @@ function reset() {
     paymentMethod: null,
     paymentAmount: null,
     remark: null,
-    associationType: 'FO'
+    PrAssociationType: 'FO'
   };
   proxy.resetForm("paymentRecordRef");
 }

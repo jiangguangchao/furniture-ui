@@ -144,11 +144,11 @@ const data = reactive({
     pageSize: 10,
     id: null,
     totalMoney: null,
-    orderStatus: null,
+    orderStatus: '1',
     orderTime: null,
     orderUser: null,
     phoneNumber: null,
-    town: "411723103",
+    town: null,
     village: null,
   },
   rules: {

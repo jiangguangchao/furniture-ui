@@ -30,10 +30,10 @@
         </el-select>
       </el-form-item>
 
-      <el-form-item label="家具类别" prop="frunitureCategory">
-        <el-select v-model="queryParams.frunitureCategory" placeholder="请选择家具类别" style="width: 100px" clearable>
+      <el-form-item label="家具类别" prop="furnitureCategory">
+        <el-select v-model="queryParams.furnitureCategory" placeholder="请选择家具类别" style="width: 100px" clearable>
           <el-option
-            v-for="dict in fruniture_category"
+            v-for="dict in furniture_category"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -97,9 +97,9 @@
     >
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="供货方" align="center" prop="supplier" />
-      <el-table-column label="家具类别" align="center" prop="frunitureCategory">
+      <el-table-column label="家具类别" align="center" prop="furnitureCategory">
         <template #default="scope">
-          <span>{{ parseFrunitureCategory(scope.row.frunitureCategory) }}</span>
+          <span>{{ parseFurnitureCategory(scope.row.furnitureCategory) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="订货日期" align="center" prop="purchaseDate" width="180">
@@ -164,7 +164,7 @@ import { eventBus } from "@/utils/eventBus";
 const { proxy } = getCurrentInstance();
 const { purchase_arrival_status } = proxy.useDict('purchase_arrival_status');
 const { purchase_logistics } = proxy.useDict('purchase_logistics');
-const { fruniture_category } = proxy.useDict('fruniture_category');
+const { furniture_category } = proxy.useDict('furniture_category');
 
 const purchaseOrderList = ref([]);
 const open = ref(false);
@@ -177,7 +177,6 @@ const total = ref(0);
 const title = ref("");
 const daterangePurchaseDate = ref([]);
 const filePathList = ref([]);
-const associationData = ref({});
 const currentPurchaseOrder = ref({});
 const detailOpen = ref(false);
 
@@ -241,8 +240,6 @@ function reset() {
     uploadFiles: []
   };
   proxy.resetForm("purchaseOrderRef");
-  associationData.value.associationId = '';
-  associationData.value.associationType = 'PO';
 }
 
 /** 搜索按钮操作 */
@@ -352,17 +349,17 @@ function handleUpload(fileList){
   
 }
 
-function parseFrunitureCategory(frunitureCategorys) {
-  if (!frunitureCategorys || frunitureCategorys.length === 0) {
+function parseFurnitureCategory(furnitureCategorys) {
+  if (!furnitureCategorys || furnitureCategorys.length === 0) {
     return '';
   }
 
-  // 将 frunitureCategorys 字符串按逗号分割成数组
-  const categoryIds = frunitureCategorys.split(',');
+  // 将 furnitureCategorys 字符串按逗号分割成数组
+  const categoryIds = furnitureCategorys.split(',');
 
-  // 使用 fruniture_category.value 数组查找对应的 label
+  // 使用 furniture_category.value 数组查找对应的 label
   const categoryNames = categoryIds.map(id => {
-    const category = fruniture_category.value.find(cat => cat.value === id);
+    const category = furniture_category.value.find(cat => cat.value === id);
     return category ? category.label : '';
   });
 
@@ -372,7 +369,7 @@ function parseFrunitureCategory(frunitureCategorys) {
 
 function getFileId(path) {
   // 找到最后一个斜杠的位置
-  const lastSlashIndex = path.lastIndexOf('/');//fruniture_category
+  const lastSlashIndex = path.lastIndexOf('/');//furniture_category
   // 提取从最后一个斜杠之后的部分
   const fileNameWithExtension = path.substring(lastSlashIndex + 1);
   // 去除后缀名

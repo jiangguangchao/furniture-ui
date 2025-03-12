@@ -16,7 +16,8 @@
       :file-list="fileList"
       :on-preview="handlePictureCardPreview"
       :class="{ hide: fileList.length >= limit }"
-      :data="associationData"
+      :data="picAssociationData"
+      :disabled="uploadDisabled"
     >
       <el-icon class="avatar-uploader-icon"><plus /></el-icon>
     </el-upload>
@@ -73,12 +74,17 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  //关联数据
-  associationData: {
+  uploadDisabled: {
+    type: Boolean,
+    default: false
+  },
+  /** 图片关联数据主体，图片会关联到家具订单，订单中家具条目，
+   * 进货单，进货单家具条目，还有支付记录这几个主体上 */
+  picAssociationData: {
     type: Object,
     default: {
-      associationId: "",
-      associationType: ""
+      picAssociationId: "",
+      picAssociationType: ""
     }
   }
 });

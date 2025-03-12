@@ -8,7 +8,7 @@
         <furnitureList :order="order" />
       </el-tab-pane>
       <el-tab-pane label="支付信息" lazy>
-        <paymentRecored :order="order" :associationType="'FO'" />
+        <paymentRecored :order="order" :PrAssociationType="'FO'" />
       </el-tab-pane>
       <el-tab-pane label="配送信息" lazy>
         <deliveryRecored :order="order" />

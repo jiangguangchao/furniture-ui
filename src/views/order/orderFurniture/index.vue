@@ -12,7 +12,7 @@
       <el-form-item label="家具类别" prop="category">
         <el-select v-model="queryParams.category" placeholder="请选择家具类别" clearable>
           <el-option
-            v-for="dict in fruniture_category"
+            v-for="dict in furniture_category"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -117,7 +117,7 @@
       <el-table-column label="订单号" align="center" prop="orderId" />
       <el-table-column label="家具类别" align="center" prop="category">
         <template #default="scope">
-          <dict-tag :options="fruniture_category" :value="scope.row.category"/>
+          <dict-tag :options="furniture_category" :value="scope.row.category"/>
         </template>
       </el-table-column>
       <el-table-column label="款式" align="center" prop="style" />
@@ -171,7 +171,7 @@
         <el-form-item label="家具类别" prop="category">
           <el-select v-model="form.category" placeholder="请选择家具类别">
             <el-option
-              v-for="dict in fruniture_category"
+              v-for="dict in furniture_category"
               :key="dict.value"
               :label="dict.label"
               :value="dict.value"
@@ -225,7 +225,7 @@
 import { listOrderFurniture, getOrderFurniture, delOrderFurniture, addOrderFurniture, updateOrderFurniture } from "@/api/order/orderFurniture";
 
 const { proxy } = getCurrentInstance();
-const { furniture_material, fruniture_category, bed_width } = proxy.useDict('furniture_material', 'fruniture_category', 'bed_width');
+const { furniture_material, furniture_category, bed_width } = proxy.useDict('furniture_material', 'furniture_category', 'bed_width');
 
 const orderFurnitureList = ref([]);
 const open = ref(false);

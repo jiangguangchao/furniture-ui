@@ -25,26 +25,35 @@
             <el-form-item label="联系电话" prop="phoneNumber">
                 <el-input v-model="form.phoneNumber" placeholder="请输入联系电话" />
             </el-form-item>
-            <el-form-item label="乡镇" prop="town" style="width: 200px">
-                <el-select v-model="form.town" placeholder="请选择乡镇" clearable>
+            <el-form-item label="地区" prop="areaType">
+                <el-radio-group v-model="form.areaType" @change="changeAreaType">
+                    <el-radio value="1">乡镇</el-radio>
+                    <el-radio value="2">县城</el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="乡镇" prop="town" style="width: 200px" v-if="form.areaType == '1'">
+                <el-select v-model="form.town" placeholder="请选择乡镇" clearable @change="townChange">
                     <el-option v-for="t in townArr" :key="t.code" :label="t.name" :value="t.code" />
                 </el-select>
             </el-form-item>
-            <el-form-item label="村委" prop="village" style="width: 200px">
+            <el-form-item label="村委" prop="village" style="width: 200px" v-if="form.areaType == '1'">
                 <el-select v-model="form.village" placeholder="请选择村委" clearable>
                     <el-option v-for="t in villageArr" :key="t.code" :label="t.name" :value="t.code" />
                 </el-select>
             </el-form-item>
-            <el-form-item label="几队" prop="dui">
+            <el-form-item label="几队" prop="dui" v-if="form.areaType == '1'">
                 <el-input v-model="form.dui" placeholder="请输入几队" />
             </el-form-item>
-            <el-form-item label="村庄" prop="subVillage">
+            <el-form-item label="村庄" prop="subVillage" v-if="form.areaType == '1'">
                 <el-input v-model="form.subVillage" placeholder="请输入村庄" />
+            </el-form-item>
+            <el-form-item label="县城地址" prop="urbanAddress" v-if="form.areaType == '2'">
+                <el-input v-model="form.urbanAddress" placeholder="请输入地址" />
             </el-form-item>
             <el-form-item label="是否包含定制" prop="includeCustom">
                 <el-radio-group v-model="form.includeCustom">
-                    <el-radio label="Y">是</el-radio>
-                    <el-radio label="N">否</el-radio>
+                    <el-radio value="Y">是</el-radio>
+                    <el-radio value="N">否</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="备注" prop="remark">
@@ -52,7 +61,6 @@
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="submitForm">确 定</el-button>
-                <el-button @click="cancel">取 消</el-button>
             </el-form-item>
         </el-form>
     </div>
@@ -83,9 +91,10 @@ const props = defineProps({
 });
 
 const mytime = parseTime();
+const showTown = ref(true);
 
 // 使用 toRefs 将 reactive 对象转换为普通对象
-let copyOrder = reactive({
+let resetOrder = reactive({
   id: null,
   totalMoney: 0,
   paidMoney: 0,
@@ -99,7 +108,9 @@ let copyOrder = reactive({
   dui: null,
   subVillage: null,
   remark: null,
-  includeCustom: 'N'
+  includeCustom: 'N',
+  areaType: '1',
+  urbanAddress: null,
 });
 
 
@@ -107,7 +118,7 @@ const townArr = computed(() => districtsStore.getDistrictsByPCode("411723")); //
 const villageArr = computed(() => districtsStore.getDistrictsByPCode("411723103"));
 
 const data = reactive({
-  form: { ...props.order },
+  form: props.order ? { ...props.order } : { ...resetOrder },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
@@ -138,10 +149,27 @@ function cancel() {
   eventBus.emit("FO:closeEditDlg");
 }
 
+function townChange() {
+    form.value.village = null;
+}
+
+function changeAreaType(areaType) {
+  if (areaType == '1') {
+    showTown.value = true;
+  } else {
+    showTown.value = false;
+  }
+}
+
 /** 提交按钮 */
 function submitForm() {
   proxy.$refs["furnitureOrderRef"].validate((valid) => {
     if (valid) {
+      if (form.value.areaType == '2') {
+        form.value.town = null;
+        form.value.village = null;
+        form.value.subVillage = null;
+      }
       if (form.value.id != null) {
         updateFurnitureOrder(form.value).then((response) => {
           proxy.$modal.msgSuccess("修改成功");

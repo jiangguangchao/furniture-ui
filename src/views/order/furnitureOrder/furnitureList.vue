@@ -2,27 +2,41 @@
   <div class="app-container">
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd"
+        <!--订单状态是进行中的才可以新增-->
+        <el-button type="primary" plain icon="Plus" v-if="order.orderStatus =='1'" @click="handleAdd"
           v-hasPermi="['order:orderFurniture:add']">新增</el-button>
       </el-col>
     </el-row>
 
     <el-table v-loading="loading" :data="orderFurnitureList" @selection-change="handleSelectionChange" border>
       <el-table-column type="expand">
-        <template #default="props">
-          <div m="4">
-            <p m="t-0 b-2">编号: {{ props.row.id }}</p>
-            <p m="t-0 b-2">订单编号: {{ props.row.orderId }}</p>
-            <p m="t-0 b-2">创建者: {{ props.row.createBy }}</p>
-            <p m="t-0 b-2">创建时间: {{ parseTime(props.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</p>
-            <p m="t-0 b-2">更新者: {{ props.row.updateBy }}</p>
-            <p m="t-0 b-2">更新时间: {{ parseTime(props.row.updateTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</p>
-          </div>
+        <template #default="scope">
+          <el-card class="box-card" style="margin-bottom: 10px; background-color: #f0f0f0;">
+            <div style="display: flex; justify-content: space-between;">
+              <div>
+                <span>编号: {{ scope.row.id }}</span><br>
+                <span>订单编号: {{ scope.row.orderId }}</span><br>
+                <span>创建者: {{ scope.row.createBy }}</span><br>
+                
+              </div>
+              <div>
+                <span>更新者: {{ scope.row.updateBy }}</span><br>
+                <span>创建时间: {{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span><br>
+                <span>更新时间: {{ parseTime(scope.row.updateTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span><br>
+                <span>家具编号: {{ parseTime(scope.row.createTime, '{y}{m}{d}{h}{i}{s}') + "0000" + scope.row.profit }}</span>
+              </div>
+            </div>
+          </el-card>
+          <el-card class="box-card" style="background-color: #f0f0f0;">
+            <ImageUpload :modelValue="scope.row.uploadFiles.map(item => item.filePath)" 
+              :picAssociationData="{ picAssociationId: scope.row.id, picAssociationType: 'OFI' }"
+              :uploadDisabled="order.orderStatus !='1'"/>
+          </el-card>
         </template>
       </el-table-column>
       <el-table-column label="家具类别" align="center" prop="category">
         <template #default="scope">
-          <dict-tag :options="fruniture_category" :value="scope.row.category" />
+          <dict-tag :options="furniture_category" :value="scope.row.category" />
         </template>
       </el-table-column>
       <el-table-column label="材质" align="center" prop="material">
@@ -39,7 +53,8 @@
       <el-table-column label="备注" align="center" prop="remark" />
 
 
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <!--订单状态是进行中的才可以修改或删除-->
+      <el-table-column label="操作" v-if="order.orderStatus =='1'" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
             v-hasPermi="['order:orderFurniture:edit']">修改</el-button>
@@ -57,7 +72,7 @@
         </el-form-item> -->
         <el-form-item label="家具类别" prop="category">
           <el-select v-model="form.category" placeholder="请选择家具类别" @change="categoryChange">
-            <el-option v-for="dict in fruniture_category" :key="dict.value" :label="dict.label"
+            <el-option v-for="dict in furniture_category" :key="dict.value" :label="dict.label"
               :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
@@ -67,8 +82,8 @@
               :value="dict.value"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="尺寸" prop="size" v-show="!isBed">
-          <el-input v-model="form.size" placeholder="请输入尺寸" />
+        <el-form-item label="尺寸(单位：米)" prop="size" v-show="!isBed">
+          <el-input-number v-model="form.size" placeholder="请输入尺寸" />
         </el-form-item>
         <el-form-item label="尺寸" prop="bedWidth" v-show="isBed">
           <el-select v-model="form.bedWidth" placeholder="请选择床宽">
@@ -76,7 +91,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="金额" prop="money">
-          <el-input v-model="form.money" placeholder="请输入金额" />
+          <el-input-number v-model="form.money" placeholder="请输入金额" />
+        </el-form-item>
+        <el-form-item label="家具编号" prop="profit">
+          <el-input-number v-model="form.profit"  />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -112,12 +130,13 @@ const props = defineProps({
 });
 
 watch(() => props.order, () => {
-  console.log("查询订单中家具列表", props.order);
   getList();
 });
 
+console.log(props.order);
+
 const { proxy } = getCurrentInstance();
-const { fruniture_category } = proxy.useDict("fruniture_category");
+const { furniture_category } = proxy.useDict("furniture_category");
 const { furniture_material } = proxy.useDict("furniture_material");
 const { bed_width } = proxy.useDict("bed_width");
 

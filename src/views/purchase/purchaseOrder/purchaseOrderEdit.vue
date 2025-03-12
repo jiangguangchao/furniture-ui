@@ -144,8 +144,6 @@ function reset() {
 
   };
   proxy.resetForm("purchaseOrderRef");
-  // associationData.value.associationId = '';
-  // associationData.value.associationType = associationType;
 }
 
 

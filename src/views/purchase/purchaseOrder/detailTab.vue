@@ -5,7 +5,7 @@
         <purchaseOrderDetail :purchaseOrder="purchaseOrder" />
       </el-tab-pane>
       <el-tab-pane label="支付信息" lazy>
-        <paymentRecored :order="purchaseOrder" :associationType="'PO'"/>
+        <paymentRecored :order="purchaseOrder" :PrAssociationType="'PO'"/>
       </el-tab-pane>
     </el-tabs>
   </div>
