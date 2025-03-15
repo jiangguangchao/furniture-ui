@@ -17,8 +17,8 @@ export function getOrderStatistics(id) {
   })
 }
 
-// 新增订单统计
-export function addOrderStatistics(data) {
+// 根据指定日期统计
+export function statcByDate(data) {
   return request({
     url: '/statistics/orderStatistics',
     method: 'post',
@@ -26,19 +26,3 @@ export function addOrderStatistics(data) {
   })
 }
 
-// 修改订单统计
-export function updateOrderStatistics(data) {
-  return request({
-    url: '/statistics/orderStatistics',
-    method: 'put',
-    data: data
-  })
-}
-
-// 删除订单统计
-export function delOrderStatistics(id) {
-  return request({
-    url: '/statistics/orderStatistics/' + id,
-    method: 'delete'
-  })
-}

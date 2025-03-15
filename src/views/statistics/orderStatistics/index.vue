@@ -23,28 +23,9 @@
           icon="Plus"
           @click="handleAdd"
           v-hasPermi="['statistics:orderStatistics:add']"
-        >新增</el-button>
+        >指定日期统计</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="Edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['statistics:orderStatistics:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="Delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['statistics:orderStatistics:remove']"
-        >删除</el-button>
-      </el-col>
+      
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -59,17 +40,14 @@
 
     <el-table v-loading="loading" :data="orderStatisticsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="${comment}" align="center" prop="id" />
       <el-table-column label="统计日期" align="center" prop="statcDate" />
-      <el-table-column label="日期类型" align="center" prop="dateType" />
-      <el-table-column label="数据类型" align="center" prop="dataType" />
-      <el-table-column label="统计值" align="center" prop="statcValue" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="数据类型" align="center" prop="dataType" >
         <template #default="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['statistics:orderStatistics:edit']">修改</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['statistics:orderStatistics:remove']">删除</el-button>
+          <dict-tag :options="order_statc_data_type" :value="scope.row.dataType"/>
         </template>
       </el-table-column>
+      <el-table-column label="统计值" align="center" prop="statcValue" />
+      
     </el-table>
     
     <pagination
@@ -80,14 +58,28 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改订单统计对话框 -->
+    <!-- 指定日期订单统计对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="orderStatisticsRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="统计日期" prop="statcDate">
-          <el-input v-model="form.statcDate" placeholder="请输入统计日期" />
+        <el-form-item label="日期类型" prop="dateType">
+          <el-select v-model="form.dateType" multiple placeholder="请选择日期类型">
+            <el-option
+              v-for="item in dateTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="统计值" prop="statcValue">
-          <el-input v-model="form.statcValue" placeholder="请输入统计值" />
+        <el-form-item label="统计日期" prop="statcDateRange">
+          <el-date-picker
+            v-model="form.statcDateRange"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+            range-separator="-"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -101,9 +93,10 @@
 </template>
 
 <script setup name="OrderStatistics">
-import { listOrderStatistics, getOrderStatistics, delOrderStatistics, addOrderStatistics, updateOrderStatistics } from "@/api/statistics/orderStatistics";
+import { listOrderStatistics, getOrderStatistics, statcByDate } from "@/api/statistics/orderStatistics";
 
 const { proxy } = getCurrentInstance();
+const { order_statc_data_type } = proxy.useDict('order_statc_data_type');
 
 const orderStatisticsList = ref([]);
 const open = ref(false);
@@ -116,31 +109,32 @@ const total = ref(0);
 const title = ref("");
 
 const data = reactive({
-  form: {},
+  form: {
+    dateType: [],
+    statcDateRange: []
+  },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
     statcDate: null,
-    dateType: null,
     dataType: null,
   },
   rules: {
-    statcDate: [
-      { required: true, message: "统计日期不能为空", trigger: "blur" }
+    statcDateRange: [
+      { required: true, message: "统计日期不能为空", trigger: "change" }
     ],
     dateType: [
       { required: true, message: "日期类型不能为空", trigger: "change" }
-    ],
-    dataType: [
-      { required: true, message: "数据类型不能为空", trigger: "change" }
-    ],
-    statcValue: [
-      { required: true, message: "统计值不能为空", trigger: "blur" }
     ]
-  }
+  },
+  dateTypeOptions: [
+    { value: 'D', label: '日' },
+    { value: 'M', label: '月' },
+    { value: 'Y', label: '年' }
+  ]
 });
 
-const { queryParams, form, rules } = toRefs(data);
+const { queryParams, form, rules, dateTypeOptions } = toRefs(data);
 
 /** 查询订单统计列表 */
 function getList() {
@@ -163,7 +157,6 @@ function reset() {
   form.value = {
     id: null,
     statcDate: null,
-    dateType: null,
     dataType: null,
     statcValue: null
   };
@@ -193,7 +186,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加订单统计";
+  title.value = "订单统计";
 }
 
 /** 修改按钮操作 */
@@ -211,19 +204,16 @@ function handleUpdate(row) {
 function submitForm() {
   proxy.$refs["orderStatisticsRef"].validate(valid => {
     if (valid) {
-      if (form.value.id != null) {
-        updateOrderStatistics(form.value).then(response => {
-          proxy.$modal.msgSuccess("修改成功");
-          open.value = false;
-          getList();
-        });
-      } else {
-        addOrderStatistics(form.value).then(response => {
-          proxy.$modal.msgSuccess("新增成功");
-          open.value = false;
-          getList();
-        });
-      }
+
+      const dto = {
+        dateTypeList: form.value.dateType,
+        startDate: form.value.statcDateRange[0],
+        endDate: form.value.statcDateRange[1]
+      };
+
+      statcByDate(dto).then(response => {
+        proxy.$modal.msgSuccess("统计成功");
+      });
     }
   });
 }
